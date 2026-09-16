@@ -1,0 +1,79 @@
+/* ============================================================
+   NULL//TRACE — Scene Layout Utilities
+   Full-viewport sections, pinned layouts, parallax layers
+   ============================================================ */
+
+.scene {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.scene--pinned {
+  height: 100vh;
+  position: relative;
+}
+
+.scene--fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
+.scene__inner {
+  width: 100%;
+  max-width: 1280px;
+  padding: var(--space-2xl) var(--space-xl);
+  margin: 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+.scene__inner--narrow {
+  max-width: 860px;
+}
+
+.scene__inner--wide {
+  max-width: 1440px;
+}
+
+/* Split compositions */
+.scene-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2xl);
+  align-items: center;
+  width: 100%;
+}
+
+@media (max-width: 860px) {
+  .scene-split {
+    grid-template-columns: 1fr;
+    gap: var(--space-xl);
+  }
+}
+
+/* Layer positioning */
+.scene__layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.scene__layer--bg {
+  z-index: 0;
+}
+
+.scene__layer--content {
+  position: relative;
+  z-index: 1;
+}
+
+.scene__layer--overlay {
+  z-index: 10;
+}

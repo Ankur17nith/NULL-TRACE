@@ -1,0 +1,290 @@
+/* ============================================================
+   NULL//TRACE — Animations v2.0
+   Scene transitions, text reveals, glitch effects, network
+   ============================================================ */
+
+/* ─── TEXT REVEAL ──────────────────────────────────────── */
+
+.char-reveal {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.5s ease, transform 0.5s var(--ease-out-expo);
+}
+
+.char-reveal--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.word-reveal {
+  display: inline-block;
+  overflow: hidden;
+}
+
+.word-reveal__inner {
+  display: inline-block;
+  transform: translateY(110%);
+  transition: transform 0.7s var(--ease-out-expo);
+}
+
+.word-reveal--visible .word-reveal__inner {
+  transform: translateY(0);
+}
+
+/* ─── TYPEWRITER ───────────────────────────────────────── */
+
+.typewriter-line {
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: var(--font-mono);
+  border-right: 2px solid var(--accent);
+  width: 0;
+  animation: type-in 1.2s steps(40) forwards;
+}
+
+.typewriter-line--no-cursor {
+  border-right: none;
+}
+
+.typewriter-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 1.1em;
+  background: var(--accent);
+  animation: blink-cursor 0.8s step-end infinite;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+}
+
+/* ─── GLITCH TEXT ──────────────────────────────────────── */
+
+.glitch-text {
+  position: relative;
+}
+
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.glitch-text--active::before {
+  color: var(--accent);
+  animation: glitch-1 0.3s linear;
+  opacity: 0.7;
+}
+
+.glitch-text--active::after {
+  color: var(--status-danger);
+  animation: glitch-1 0.3s linear reverse;
+  opacity: 0.7;
+}
+
+/* ─── STAGGER CHILDREN ─────────────────────────────────── */
+
+.stagger-children > * {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.stagger-children--visible > * {
+  animation: fade-in-up 0.5s var(--ease-out-expo) forwards;
+}
+
+.stagger-children--visible > *:nth-child(1) { animation-delay: 0.05s; }
+.stagger-children--visible > *:nth-child(2) { animation-delay: 0.1s; }
+.stagger-children--visible > *:nth-child(3) { animation-delay: 0.15s; }
+.stagger-children--visible > *:nth-child(4) { animation-delay: 0.2s; }
+.stagger-children--visible > *:nth-child(5) { animation-delay: 0.25s; }
+.stagger-children--visible > *:nth-child(6) { animation-delay: 0.3s; }
+.stagger-children--visible > *:nth-child(7) { animation-delay: 0.35s; }
+.stagger-children--visible > *:nth-child(8) { animation-delay: 0.4s; }
+.stagger-children--visible > *:nth-child(9) { animation-delay: 0.45s; }
+.stagger-children--visible > *:nth-child(10) { animation-delay: 0.5s; }
+.stagger-children--visible > *:nth-child(11) { animation-delay: 0.55s; }
+.stagger-children--visible > *:nth-child(12) { animation-delay: 0.6s; }
+
+/* ─── SCENE TRANSITIONS ───────────────────────────────── */
+
+.scene-enter {
+  opacity: 0;
+  transform: translateY(60px);
+}
+
+.scene-enter--active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.8s var(--ease-out-expo);
+}
+
+/* Clip reveal from center */
+.clip-reveal {
+  clip-path: inset(50% 50% 50% 50%);
+  transition: clip-path 1s var(--ease-out-expo);
+}
+
+.clip-reveal--visible {
+  clip-path: inset(0 0 0 0);
+}
+
+/* Scale zoom */
+.zoom-in {
+  opacity: 0;
+  transform: scale(0.9);
+  transition: all 0.8s var(--ease-out-expo);
+}
+
+.zoom-in--visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─── NETWORK ANIMATIONS ──────────────────────────────── */
+
+.packet-trail {
+  stroke-dasharray: 6 8;
+  animation: dash-flow 0.6s linear infinite;
+}
+
+.node-pulse {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.node-compromised {
+  animation: threat-pulse 1.2s ease-in-out infinite;
+}
+
+.connection-line {
+  stroke-dasharray: 4 6;
+  animation: dash-flow 1s linear infinite;
+}
+
+/* ─── PROGRESS BAR ─────────────────────────────────────── */
+
+.progress-bar {
+  height: 4px;
+  background: var(--bg-primary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-bar__fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.6s var(--ease-out-expo);
+}
+
+.progress-bar__fill--danger {
+  background: var(--status-danger);
+}
+
+.progress-bar__fill--warning {
+  background: var(--status-warning);
+}
+
+/* ─── THREAT BAR ───────────────────────────────────────── */
+
+.threat-bar {
+  height: 6px;
+  background: var(--bg-primary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.threat-bar__fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--status-warning), var(--status-danger));
+  border-radius: 3px;
+  transition: width 1s ease;
+  position: relative;
+}
+
+/* ─── ACHIEVEMENT TOAST ────────────────────────────────── */
+
+.achievement-toast {
+  position: fixed;
+  top: var(--space-xl);
+  right: var(--space-xl);
+  z-index: var(--z-overlay);
+  transform: translateX(120%);
+  transition: transform 0.5s var(--ease-out-expo);
+}
+
+.achievement-toast--visible {
+  transform: translateX(0);
+}
+
+/* ─── SCORE COUNTER ────────────────────────────────────── */
+
+.score-counter {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.score-counter--counting {
+  animation: count-up 0.3s var(--ease-out-expo);
+}
+
+/* ─── RANK REVEAL ──────────────────────────────────────── */
+
+.rank-reveal {
+  opacity: 0;
+  transform: scale(0.7);
+  transition: all 0.8s var(--ease-out-expo);
+}
+
+.rank-reveal--visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ─── MODAL ────────────────────────────────────────────── */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(8px);
+  z-index: var(--z-modal);
+  opacity: 0;
+  transition: opacity var(--transition-slow);
+  pointer-events: none;
+}
+
+.modal-overlay--visible {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-content {
+  opacity: 0;
+  transform: scale(0.96) translateY(10px);
+  transition: all 0.4s var(--ease-out-expo);
+}
+
+.modal-overlay--visible .modal-content {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* ─── SCAN PASS ────────────────────────────────────────── */
+
+.scan-pass {
+  position: relative;
+  overflow: hidden;
+}
+
+.scan-pass::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  animation: scan-line-pass 4s linear infinite;
+}

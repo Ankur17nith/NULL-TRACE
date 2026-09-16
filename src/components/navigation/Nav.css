@@ -1,0 +1,226 @@
+/* ============================================================
+   NULL//TRACE — Navigation Styles (Hack the North Style)
+   ============================================================ */
+
+.nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-nav);
+  padding: 16px 24px;
+  transition: all var(--transition-base);
+}
+
+.nav--scrolled {
+  padding: 10px 24px;
+  background: rgba(20, 20, 37, 0.88);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.nav__inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.nav__logo {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  text-decoration: none;
+  user-select: none;
+}
+
+.nav__logo-null {
+  color: var(--htn-blue);
+}
+
+.nav__logo-slash {
+  color: var(--htn-coral);
+  margin: 0 1px;
+}
+
+.nav__logo-trace {
+  color: var(--htn-green);
+}
+
+.nav__links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 4px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nav__link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  border-radius: var(--radius-pill);
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.nav__link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.nav__link-num {
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--htn-yellow);
+  background: rgba(251, 228, 150, 0.12);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.nav__link-label {
+  letter-spacing: 0.03em;
+}
+
+/* Mobile Hamburger */
+.nav__hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 0;
+}
+
+.nav__hamburger-line {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-primary);
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.nav__hamburger-line::before,
+.nav__hamburger-line::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--text-primary);
+  transition: transform 0.2s ease;
+}
+
+.nav__hamburger-line::before {
+  top: -6px;
+}
+
+.nav__hamburger-line::after {
+  bottom: -6px;
+}
+
+.nav__hamburger-line--open {
+  background: transparent;
+}
+
+.nav__hamburger-line--open::before {
+  transform: translateY(6px) rotate(45deg);
+}
+
+.nav__hamburger-line--open::after {
+  transform: translateY(-6px) rotate(-45deg);
+}
+
+/* Mobile Fullscreen Menu */
+.mobile-menu {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 20, 37, 0.98);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: calc(var(--z-nav) - 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2xl);
+  animation: fade-in 0.3s ease;
+}
+
+.mobile-menu__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-md);
+  text-align: center;
+}
+
+.mobile-menu__logo {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 900;
+  margin-bottom: var(--space-lg);
+}
+
+.mobile-menu__link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-fast);
+  animation: fade-in-up 0.4s ease forwards;
+}
+
+.mobile-menu__link:hover {
+  color: var(--htn-green);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mobile-menu__num {
+  font-family: var(--font-pixel);
+  font-size: 1rem;
+  color: var(--htn-yellow);
+}
+
+@media (min-width: 861px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .hide-mobile {
+    display: none !important;
+  }
+  .nav {
+    padding: 12px 16px;
+  }
+}

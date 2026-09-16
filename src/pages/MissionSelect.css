@@ -1,0 +1,426 @@
+/* ============================================================
+   NULL//TRACE — Mission Select Pathway (Hack the North Design System)
+   Warm Midnight-Violet, Pastel Progression Track, Tactile Dossier
+   ============================================================ */
+
+.mission-select-page {
+  min-height: 100vh;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.mission-select-header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-nav);
+  background: rgba(20, 20, 37, 0.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: 16px 24px;
+}
+
+.mission-select-header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.mission-select-header__title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mission-select-header__title h1 {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.label-accent {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--htn-yellow);
+  letter-spacing: 0.08em;
+}
+
+.mission-select-header__operator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  padding: 6px 14px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.operator-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--htn-mint);
+  box-shadow: 0 0 8px rgba(191, 239, 222, 0.6);
+  animation: pulse-dot 2s ease infinite;
+}
+
+/* Layout */
+.mission-select-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 40px 24px;
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 36px;
+  flex: 1;
+}
+
+/* Pathway on Left */
+.mission-pathway {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.mission-pathway__title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.mission-progress-tag {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--htn-mint);
+  padding: 3px 10px;
+  background: rgba(191, 239, 222, 0.12);
+  border: 1px solid var(--htn-mint);
+  border-radius: var(--radius-full);
+}
+
+.mission-nodes-track {
+  display: flex;
+  flex-direction: column;
+}
+
+.mission-track-step {
+  display: flex;
+  flex-direction: column;
+}
+
+.mission-track-connector {
+  width: 3px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  margin-left: 39px;
+  transition: background var(--transition-base);
+}
+
+.mission-track-connector--active {
+  background: var(--htn-mint);
+  box-shadow: 0 0 8px rgba(191, 239, 222, 0.5);
+}
+
+.mission-node-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  position: relative;
+  box-shadow: 0 4px 12px rgba(10, 10, 20, 0.3);
+}
+
+.mission-node-card:hover {
+  border-color: rgba(255, 255, 255, 0.18);
+  transform: translateX(4px);
+  background: var(--bg-surface-elevated);
+  box-shadow: 0 6px 18px rgba(10, 10, 20, 0.4);
+}
+
+.mission-node-card--selected {
+  border-color: var(--htn-lavender);
+  background: rgba(230, 181, 249, 0.1);
+  box-shadow: 0 0 24px rgba(230, 181, 249, 0.18);
+}
+
+.mission-node-card--completed {
+  border-left: 4px solid var(--htn-mint);
+}
+
+.mission-node-card--locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.mission-node-card--locked:hover {
+  transform: none;
+  border-color: var(--border-subtle);
+  background: var(--bg-surface);
+}
+
+.mission-node-indicator {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 800;
+  color: #141425;
+  background: var(--htn-mint);
+  border: none;
+  flex-shrink: 0;
+  transition: all var(--transition-fast);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.25);
+}
+
+.mission-node-card--selected .mission-node-indicator {
+  background: var(--htn-lavender);
+  color: #141425;
+  box-shadow: 0 0 14px rgba(230, 181, 249, 0.5);
+}
+
+.mission-node-card--locked .mission-node-indicator {
+  background: var(--bg-surface-elevated);
+  color: var(--text-muted);
+  box-shadow: none;
+  border: 1px solid var(--border-subtle);
+}
+
+.mission-node-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.mission-node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mission-node-num {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+}
+
+.mission-node-diff {
+  font-size: 11px;
+  color: var(--htn-yellow);
+}
+
+.mission-node-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.mission-node-subtitle {
+  font-family: var(--font-body);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.mission-node-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+}
+
+.mission-node-score .score-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+}
+
+.mission-node-score .score-val {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--htn-mint);
+}
+
+/* Right: Dossier Panel */
+.mission-dossier {
+  position: sticky;
+  top: 96px;
+  align-self: start;
+}
+
+.dossier-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 16px 40px rgba(10, 10, 20, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.dossier-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--htn-blue), var(--htn-lavender), var(--htn-mint));
+}
+
+.dossier-header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dossier-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.dossier-title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.dossier-subtitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--htn-yellow);
+}
+
+.dossier-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--border-subtle);
+}
+
+.dossier-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dossier-section h4 {
+  font-family: var(--font-display);
+  font-size: 11px;
+  color: var(--htn-blue);
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+.dossier-briefing-sample {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.dossier-objectives-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+}
+
+.dossier-objective-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.dossier-objective-item .obj-bullet {
+  color: var(--htn-mint);
+  font-size: 11px;
+  margin-top: 1px;
+}
+
+.dossier-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 12px;
+  background: #141425;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.dossier-meta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.dossier-meta-item .meta-label {
+  font-family: var(--font-display);
+  font-size: 9px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.dossier-meta-item .meta-val {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.dossier-actions {
+  margin-top: 8px;
+}
+
+@media (max-width: 960px) {
+  .mission-select-container {
+    grid-template-columns: 1fr;
+  }
+  .mission-dossier {
+    position: static;
+  }
+}

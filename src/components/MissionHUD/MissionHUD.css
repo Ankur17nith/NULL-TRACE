@@ -1,0 +1,243 @@
+/* ============================================================
+   NULL//TRACE — Mission HUD (Hack the North Design System)
+   Frosted Midnight-Violet Top Bar, Pastel Telemetry & Tactile Badges
+   ============================================================ */
+
+.mission-hud {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  padding: 0 var(--space-xl);
+  background: rgba(20, 20, 37, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-body);
+  user-select: none;
+  z-index: var(--z-hud);
+  flex-shrink: 0;
+  box-shadow: 0 4px 20px rgba(10, 10, 20, 0.4);
+}
+
+.mission-hud__left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 220px;
+}
+
+.mission-hud__exit-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(243, 103, 90, 0.12);
+  border: 1px solid rgba(243, 103, 90, 0.3);
+  color: var(--htn-coral);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.mission-hud__exit-btn:hover {
+  background: var(--htn-coral);
+  border-color: var(--htn-coral);
+  color: #141425;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(243, 103, 90, 0.3);
+}
+
+.mission-hud__exit-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.mission-hud__exit-icon {
+  font-size: 10px;
+}
+
+.mission-hud__badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-full);
+}
+
+.mission-hud__badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--htn-mint);
+  box-shadow: 0 0 8px rgba(191, 239, 222, 0.6);
+  animation: pulse-dot 2s ease infinite;
+}
+
+.mission-hud__label {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+}
+
+.mission-hud__center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-md);
+}
+
+.mission-hud__objective {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  max-width: 520px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 6px 16px;
+  border-radius: var(--radius-md);
+}
+
+.mission-hud__obj-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mission-hud__obj-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.06em;
+  font-weight: 700;
+}
+
+.mission-hud__obj-progress {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--htn-yellow);
+  font-weight: 800;
+  background: rgba(251, 228, 150, 0.12);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.mission-hud__obj-text {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-primary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 460px;
+  font-weight: 600;
+}
+
+.mission-hud__right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  min-width: 240px;
+  justify-content: flex-end;
+}
+
+.mission-hud__timer,
+.mission-hud__score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.mission-hud__timer-label,
+.mission-hud__score-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  font-weight: 700;
+}
+
+.mission-hud__timer-box,
+.mission-hud__score-box {
+  padding: 4px 12px;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  min-width: 80px;
+  text-align: right;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.mission-hud__timer-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.mission-hud__timer--warning .mission-hud__timer-box {
+  border-color: var(--htn-yellow);
+  background: rgba(251, 228, 150, 0.12);
+}
+
+.mission-hud__timer--warning .mission-hud__timer-value {
+  color: var(--htn-yellow);
+}
+
+.mission-hud__timer--critical .mission-hud__timer-box {
+  border-color: var(--htn-coral);
+  background: rgba(243, 103, 90, 0.15);
+  animation: hud-flash 1s ease infinite alternate;
+}
+
+.mission-hud__timer--critical .mission-hud__timer-value {
+  color: var(--htn-coral);
+}
+
+@keyframes hud-flash {
+  from {
+    border-color: rgba(243, 103, 90, 0.4);
+    box-shadow: none;
+  }
+  to {
+    border-color: var(--htn-coral);
+    box-shadow: 0 0 12px rgba(243, 103, 90, 0.4);
+  }
+}
+
+.mission-hud__score-value {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--htn-mint);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 860px) {
+  .mission-hud {
+    padding: 0 var(--space-md);
+    height: 60px;
+  }
+  .mission-hud__center {
+    display: none;
+  }
+  .mission-hud__left {
+    min-width: auto;
+  }
+  .mission-hud__right {
+    min-width: auto;
+    gap: var(--space-sm);
+  }
+}

@@ -1,0 +1,392 @@
+/* ============================================================
+   NULL//TRACE — Design System v3.0 (Hack the North Edition)
+   Midnight Navy/Violet + Playful Pastel + 3D Tactile Components
+   ============================================================ */
+
+/* --- Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&family=Pixelify+Sans:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import './styles/scenes.css';
+
+:root {
+  /* ── Core Hack the North Canvas & Surfaces ────────────── */
+  --bg-canvas: #141425;
+  --bg-primary: #141425;
+  --bg-surface: #1c1c36;
+  --bg-surface-elevated: #252548;
+  --bg-surface-hover: #2f2f5a;
+  --bg-surface-alt: #18182e;
+  --bg-overlay: rgba(20, 20, 37, 0.92);
+  --bg-overlay-light: rgba(20, 20, 37, 0.65);
+
+  /* ── Signature HTN Pastel Palette ────────────────────── */
+  --htn-blue: #9CB1FC;
+  --htn-blue-dim: #6F8DF8;
+  --htn-purple: #E6B5F9;
+  --htn-purple-dim: #D68AF4;
+  --htn-pink: #FFB0DB;
+  --htn-pink-dim: #F277BA;
+  --htn-yellow: #FBE496;
+  --htn-yellow-dim: #FFE657;
+  --htn-green: #BFEFDE;
+  --htn-green-dim: #75DAB6;
+  --htn-cream: #FDF7EA;
+  --htn-coral: #F3675A;
+  --htn-coral-dim: #D84F42;
+  --htn-orange: #FFA45B;
+
+  /* Aliases for semantic usage */
+  --accent: var(--htn-green);
+  --accent-bright: #d4fff0;
+  --accent-dim: var(--htn-green-dim);
+  --accent-glow: rgba(191, 239, 222, 0.18);
+  --accent-glow-strong: rgba(191, 239, 222, 0.35);
+
+  --status-online: var(--htn-green);
+  --status-warning: var(--htn-yellow);
+  --status-danger: var(--htn-coral);
+  --status-info: var(--htn-blue);
+  --status-purple: var(--htn-purple);
+
+  /* ── Text Hierarchy ──────────────────────────────────── */
+  --text-primary: #FFFFFFDE;   /* 87% white */
+  --text-secondary: #FFFFFF99; /* 60% white */
+  --text-muted: #FFFFFF61;     /* 38% white */
+  --text-dim: #FFFFFF38;
+  --text-cream: #FDF7EA;
+  --text-inverse: #0D0D0B;
+
+  /* ── Borders & Outlines ───────────────────────────────── */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.22);
+  --border-accent: var(--htn-green);
+
+  /* ── Typography Scale ────────────────────────────────── */
+  --font-display: 'Outfit', 'Castledown', -apple-system, sans-serif;
+  --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-pixel: 'Pixelify Sans', monospace;
+
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.1875rem;  /* 19px */
+  --text-xl: 1.375rem;   /* 22px */
+  --text-2xl: 1.75rem;   /* 28px */
+  --text-3xl: 2.25rem;   /* 36px */
+  --text-4xl: 3rem;      /* 48px */
+  --text-5xl: 4rem;      /* 64px */
+
+  /* ── Spacing Scale ───────────────────────────────────── */
+  --space-2xs: 0.25rem;  /* 4px */
+  --space-xs: 0.5rem;    /* 8px */
+  --space-sm: 0.75rem;   /* 12px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px */
+  --space-xl: 2rem;      /* 32px */
+  --space-2xl: 3rem;     /* 48px */
+  --space-3xl: 4.5rem;   /* 72px */
+
+  /* ── Border Radii (Friendly rounded shapes) ──────────── */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 9999px;
+
+  /* ── 3D Inset & Ambient Shadows ──────────────────────── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+  --shadow-btn-3d: inset 0 -4px 0 rgba(0, 0, 0, 0.32);
+  --shadow-btn-3d-active: inset 0 -2px 0 rgba(0, 0, 0, 0.32);
+
+  /* ── Transitions ─────────────────────────────────────── */
+  --transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-slow: 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Z-Index Hierarchy ───────────────────────────────── */
+  --z-bg: 0;
+  --z-content: 1;
+  --z-panel: 10;
+  --z-hud: 50;
+  --z-nav: 100;
+  --z-modal: 200;
+  --z-toast: 300;
+}
+
+/* ── Reset & Global Defaults ─────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100vh;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ── Typography Presets ──────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+
+p {
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+a {
+  color: var(--htn-blue);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--htn-green);
+}
+
+/* ── Tags & Badges ───────────────────────────────────────── */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.tag--accent {
+  background: rgba(191, 239, 222, 0.12);
+  border-color: var(--htn-green);
+  color: var(--htn-green);
+}
+
+.tag--purple {
+  background: rgba(230, 181, 249, 0.12);
+  border-color: var(--htn-purple);
+  color: var(--htn-purple);
+}
+
+.tag--blue {
+  background: rgba(156, 177, 252, 0.12);
+  border-color: var(--htn-blue);
+  color: var(--htn-blue);
+}
+
+.tag--yellow {
+  background: rgba(251, 228, 150, 0.12);
+  border-color: var(--htn-yellow);
+  color: var(--htn-yellow);
+}
+
+.tag--coral {
+  background: rgba(243, 103, 90, 0.12);
+  border-color: var(--htn-coral);
+  color: var(--htn-coral);
+}
+
+.tag--pixel {
+  font-family: var(--font-pixel);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+/* ── Reusable Form Inputs ────────────────────────────────── */
+.input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: all var(--transition-fast);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.input:focus {
+  border-color: var(--htn-blue);
+  box-shadow: 0 0 12px rgba(156, 177, 252, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ── HTN-Style 3D Buttons (Global Utility) ───────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.12s ease;
+  box-shadow: var(--shadow-btn-3d), 0 4px 14px rgba(0, 0, 0, 0.25);
+  position: relative;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: var(--shadow-btn-3d-active);
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Colorways */
+.btn--primary,
+.btn--cta {
+  background: linear-gradient(90deg, #F3675A 0%, #FF8577 55%, #FFA45B 100%);
+  color: #0D0D0B;
+}
+
+.btn--mint {
+  background: linear-gradient(90deg, #75DAB6 0%, #BFEFDE 60%, #9CB1FC 100%);
+  color: #0D0D0B;
+}
+
+.btn--lavender {
+  background: linear-gradient(90deg, #D68AF4 0%, #E6B5F9 60%, #FFB0DB 100%);
+  color: #0D0D0B;
+}
+
+.btn--blue {
+  background: linear-gradient(90deg, #6F8DF8 0%, #9CB1FC 60%, #BFEFDE 100%);
+  color: #0D0D0B;
+}
+
+.btn--yellow {
+  background: linear-gradient(90deg, #FFA45B 0%, #FFE657 60%, #FBE496 100%);
+  color: #0D0D0B;
+}
+
+.btn--secondary {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-btn-3d);
+}
+
+.btn--secondary:hover:not(:disabled) {
+  border-color: var(--htn-blue);
+  background: var(--bg-surface-hover);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+  transform: none;
+}
+
+.btn--sm {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+}
+
+.btn--lg {
+  padding: 14px 28px;
+  font-size: 17px;
+  border-radius: var(--radius-md);
+}
+
+.btn--pill {
+  border-radius: var(--radius-pill);
+}
+
+.w-full {
+  width: 100%;
+}
+
+/* ── Panel Card Utilities ────────────────────────────────── */
+.panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+.panel--elevated {
+  background: var(--bg-surface-elevated);
+  border-color: var(--border-default);
+}
+
+.panel__header {
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+.panel__body {
+  padding: var(--space-lg);
+}
+
+/* ── Accessibility & Reduced Motion ──────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,139 @@
+/* ============================================================
+   NULL//TRACE — HTNButton Styles
+   Tactile 3D Buttons with gradient fills and inset bevels
+   ============================================================ */
+
+.htn-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 0;
+  border-radius: var(--radius-md);
+  font-family: var(--font-display);
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  box-sizing: border-box;
+  box-shadow: var(--shadow-btn-3d), 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: transform 0.12s ease, filter 0.15s ease, box-shadow 0.12s ease;
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.htn-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.08);
+}
+
+.htn-btn:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: var(--shadow-btn-3d-active);
+}
+
+.htn-btn:focus-visible {
+  outline: 2px solid var(--htn-blue);
+  outline-offset: 3px;
+}
+
+.htn-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: grayscale(0.4);
+}
+
+/* Sizes */
+.htn-btn--sm {
+  padding: 6px 14px;
+  font-size: 13px;
+  min-height: 32px;
+  border-radius: var(--radius-sm);
+}
+
+.htn-btn--md {
+  padding: 10px 22px;
+  font-size: 15px;
+  min-height: 44px;
+}
+
+.htn-btn--lg {
+  padding: 14px 28px;
+  font-size: 17px;
+  min-height: 52px;
+  border-radius: var(--radius-lg);
+}
+
+.htn-btn--pill {
+  border-radius: var(--radius-pill);
+}
+
+/* Variants */
+.htn-btn--coral {
+  background: linear-gradient(90deg, #F3675A 0%, #FF8577 55%, #FFA45B 100%);
+  color: #0D0D0B;
+}
+
+.htn-btn--mint {
+  background: linear-gradient(90deg, #75DAB6 0%, #BFEFDE 60%, #9CB1FC 100%);
+  color: #0D0D0B;
+}
+
+.htn-btn--lavender {
+  background: linear-gradient(90deg, #D68AF4 0%, #E6B5F9 60%, #FFB0DB 100%);
+  color: #0D0D0B;
+}
+
+.htn-btn--blue {
+  background: linear-gradient(90deg, #6F8DF8 0%, #9CB1FC 60%, #BFEFDE 100%);
+  color: #0D0D0B;
+}
+
+.htn-btn--yellow {
+  background: linear-gradient(90deg, #FFA45B 0%, #FFE657 60%, #FBE496 100%);
+  color: #0D0D0B;
+}
+
+.htn-btn--secondary {
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-default);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-btn-3d);
+}
+
+.htn-btn--secondary:hover:not(:disabled) {
+  border-color: var(--htn-blue);
+  background: var(--bg-surface-hover);
+}
+
+.htn-btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid transparent;
+  box-shadow: none;
+}
+
+.htn-btn--ghost:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.08);
+  transform: none;
+}
+
+.htn-btn__label {
+  position: relative;
+  z-index: 1;
+}
+
+.htn-btn__arrow {
+  position: relative;
+  z-index: 1;
+  font-size: 1.1em;
+  line-height: 1;
+  transition: transform var(--transition-fast);
+}
+
+.htn-btn:hover:not(:disabled) .htn-btn__arrow {
+  transform: translateX(3px);
+}

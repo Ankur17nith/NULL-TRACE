@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="NULL//TRACE — An interactive cybersecurity investigation game. Trace the breach. Outsmart the system." />
+    <meta name="theme-color" content="#141425" />
+    <title>NULL//TRACE — Trace the Breach. Outsmart the System.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Pixelify+Sans:wght@500;700&display=swap" rel="stylesheet" />
+    <style>
+      /* Critical loading screen — shows before React mounts */
+      #root:empty {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #141425;
+        color: #BFEFDE;
+        font-family: 'Outfit', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+      }
+      #root:empty::after {
+        content: 'BOOTING NULL//TRACE // POLYNET OS...';
+        animation: pulse 1.5s ease infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 0.4; }
+        50% { opacity: 1; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

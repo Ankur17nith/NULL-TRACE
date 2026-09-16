@@ -1,0 +1,260 @@
+/* ============================================================
+   NULL//TRACE — Network Map (Hack the North Design System)
+   Playful Pastel Nodes, Animated Connections, Friendly Tooltips
+   ============================================================ */
+
+.network-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 12px 32px rgba(10, 10, 20, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.network-map__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-surface-elevated);
+  border-bottom: 1px solid var(--border-subtle);
+  font-family: var(--font-display);
+  font-size: 12px;
+  color: var(--text-primary);
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.network-map__header-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.network-map__pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--htn-mint);
+  box-shadow: 0 0 8px rgba(191, 239, 222, 0.6);
+  animation: pulse-dot 2.4s ease infinite;
+}
+
+.network-map__header-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.htn-mesh-stat {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.htn-mesh-dot {
+  opacity: 0.4;
+}
+
+.network-map__mode-badge {
+  padding: 3px 8px;
+  background: rgba(156, 177, 252, 0.15);
+  border: 1px solid var(--htn-blue);
+  border-radius: var(--radius-full);
+  color: var(--htn-blue);
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.network-map__svg {
+  width: 100%;
+  flex: 1;
+  display: block;
+  min-height: 280px;
+}
+
+/* Nodes */
+.network-node {
+  cursor: pointer;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+}
+
+.network-node:hover {
+  filter: brightness(1.2) drop-shadow(0 6px 16px rgba(0, 0, 0, 0.4));
+  transform: translateY(-2px);
+}
+
+.network-node:focus-visible {
+  outline: 2px solid var(--htn-mint);
+  outline-offset: 6px;
+}
+
+.network-node--selected .node-body {
+  filter: drop-shadow(0 0 12px var(--htn-mint));
+}
+
+.network-node--threat .node-body {
+  filter: drop-shadow(0 0 14px rgba(243, 103, 90, 0.6));
+}
+
+.node-body {
+  transition: fill 0.3s ease, stroke 0.3s ease;
+}
+
+.node-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  fill: var(--text-primary);
+  text-anchor: middle;
+  pointer-events: none;
+  user-select: none;
+  letter-spacing: 0.02em;
+}
+
+.node-icon-text {
+  font-family: var(--font-display);
+  user-select: none;
+}
+
+/* Connections */
+.network-connection {
+  stroke: rgba(255, 255, 255, 0.12);
+  stroke-width: 1.5;
+  fill: none;
+  transition: stroke 0.3s ease;
+}
+
+.network-connection--active {
+  stroke: var(--htn-mint);
+  stroke-width: 2.5;
+  filter: drop-shadow(0 0 6px rgba(191, 239, 222, 0.5));
+}
+
+.network-connection--congested {
+  stroke: var(--htn-yellow);
+  stroke-dasharray: 4, 4;
+  opacity: 0.8;
+}
+
+.network-connection--threat {
+  stroke: var(--htn-coral);
+  stroke-width: 2;
+  stroke-dasharray: 6, 4;
+  animation: dash-flow 1s linear infinite;
+}
+
+@keyframes dash-flow {
+  from {
+    stroke-dashoffset: 24;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Route path in routing mode */
+.route-path {
+  stroke: var(--htn-blue);
+  stroke-width: 3.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 8px rgba(156, 177, 252, 0.5));
+  stroke-dasharray: 8, 4;
+  animation: dash-flow 1.2s linear infinite;
+}
+
+/* Interactive Tooltip */
+.node-tooltip {
+  position: absolute;
+  background: var(--bg-surface-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  pointer-events: none;
+  z-index: var(--z-panel);
+  min-width: 200px;
+  box-shadow: 0 16px 36px rgba(10, 10, 20, 0.6), 0 2px 6px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.node-tooltip__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 6px;
+}
+
+.node-tooltip__title {
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.node-tooltip__badge {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+}
+
+.node-tooltip__details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 11px;
+}
+
+.node-tooltip__key {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  margin-right: 4px;
+}
+
+.node-tooltip__action {
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--htn-mint);
+  letter-spacing: 0.02em;
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .network-map {
+    border-radius: var(--radius-md);
+  }
+  .node-label {
+    font-size: 9px;
+  }
+  .network-map__header-stats {
+    display: none;
+  }
+}
