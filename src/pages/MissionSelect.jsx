@@ -50,8 +50,8 @@ export default function MissionSelect() {
       {/* Top Bar */}
       <header className="mission-select-header">
         <div className="mission-select-header__inner">
-          <HTNButton variant="secondary" size="sm" onClick={() => navigate('/')}>
-            ← SYSTEM INTERFACE
+          <HTNButton variant="secondary" size="sm" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/menu'))}>
+            ← BACK
           </HTNButton>
           <div className="mission-select-header__title">
             <span className="label-accent">OPERATIONAL DISPATCH</span>

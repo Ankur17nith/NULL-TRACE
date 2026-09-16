@@ -10,21 +10,24 @@ import {
   binaryArrayToAscii,
   isValidBinary,
   isValidHex,
-} from '../../utils/converters';
+} from '../../utils/converters.js';
 
 class BinaryPuzzle {
-  constructor(config) {
+  constructor(config = {}) {
     this.id = config.id || 'binary-puzzle';
-    this.encodedValues = config.encodedValues || [];  // Array of binary/hex strings
+    this.encodedValues = config.encodedValues || ['01000001', '01000011', '01000011', '01000101', '01010011', '01010011'];
     this.encoding = config.encoding || 'binary';      // 'binary' | 'hex'
-    this.expectedAnswer = config.expectedAnswer;       // The decoded answer
+    this.expectedAnswer = config.expectedAnswer || 'ACCESS';       // The decoded answer
     this.hints = config.hints || [];
     this.hintsUsed = 0;
     this.attempts = 0;
+    this.mistakes = 0;
     this.solved = false;
     this.difficulty = config.difficulty || 'NORMAL';
     this.explanation = config.explanation || null;
     this.tools = config.tools || ['bin-to-dec', 'bin-to-ascii', 'hex-to-ascii', 'dec-to-bin'];
+    this.type = 'BINARY';
+    this.answer = this.expectedAnswer;
   }
 
   /**
@@ -42,13 +45,17 @@ class BinaryPuzzle {
   }
 
   /**
-   * Check the player's answer
-   * @param {string} answer
-   * @returns {object}
+   * Attempt to solve the puzzle with decoded text
+   * @param {string} answer - The player's decoded answer
+   * @returns {object} { success, message, attempts, hintsUsed }
    */
   attempt(answer) {
+    if (this.solved) {
+      return { success: false, message: 'Puzzle already completed.' };
+    }
+
     this.attempts++;
-    const cleaned = answer.trim();
+    const cleaned = (answer || '').trim();
 
     if (cleaned.toLowerCase() === this.expectedAnswer.toLowerCase()) {
       this.solved = true;
@@ -61,10 +68,12 @@ class BinaryPuzzle {
       };
     }
 
+    this.mistakes++;
     return {
       success: false,
       message: 'INVALID KEY — Decoding error detected',
       attempts: this.attempts,
+      mistakes: this.mistakes,
     };
   }
 

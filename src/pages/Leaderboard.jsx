@@ -15,7 +15,7 @@ export default function Leaderboard() {
       <Sparkle size={14} color="var(--htn-mint)" style={{ bottom: '8%', left: '8%' }} />
 
       <div className="page-header">
-        <HTNButton variant="secondary" size="sm" onClick={() => navigate('/')}>← SYSTEM HOME</HTNButton>
+        <HTNButton variant="secondary" size="sm" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/menu'))}>← BACK</HTNButton>
         <h1>OPERATOR LEADERBOARD</h1>
       </div>
 

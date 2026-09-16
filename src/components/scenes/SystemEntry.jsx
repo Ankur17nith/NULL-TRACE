@@ -4,11 +4,13 @@
 // ============================================================
 
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../../state/gameStore';
 import HTNButton from '../ui/HTNButton';
 import Sparkle from '../ui/Sparkle';
 
 export default function SystemEntry({ onEnterGame }) {
+  const navigate = useNavigate();
   const callsign = useGameStore(s => s.player.callsign);
   const setCallsign = useGameStore(s => s.setCallsign);
   const [inputValue, setInputValue] = useState(callsign || '');
@@ -71,6 +73,23 @@ export default function SystemEntry({ onEnterGame }) {
           </div>
         </form>
 
+        <div style={{ marginTop: 'var(--space-md)', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => navigate('/menu')}
+          >
+            OPERATOR MENU →
+          </button>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => navigate('/missions')}
+          >
+            MISSION SELECT →
+          </button>
+        </div>
+
         {callsign && (
           <button
             type="button"
@@ -79,7 +98,7 @@ export default function SystemEntry({ onEnterGame }) {
               setIsTransitioning(true);
               setTimeout(() => onEnterGame?.(callsign), 600);
             }}
-            style={{ marginTop: 'var(--space-md)' }}
+            style={{ marginTop: 'var(--space-sm)' }}
           >
             RESUME AS {callsign} →
           </button>

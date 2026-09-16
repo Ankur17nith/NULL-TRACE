@@ -3,7 +3,7 @@
 // Network graph, pathfinding, node states
 // ============================================================
 
-import { GameEvents, eventEngine } from './EventEngine';
+import { GameEvents, eventEngine } from './EventEngine.js';
 
 class NetworkEngine {
   constructor() {

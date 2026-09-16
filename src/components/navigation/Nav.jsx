@@ -13,7 +13,8 @@ const NAV_ITEMS = [
   { num: '02', label: 'NETWORK', href: '#network' },
   { num: '03', label: 'MISSIONS', href: '#missions' },
   { num: '04', label: 'ARCHIVE', href: '/archive', isRoute: true },
-  { num: '05', label: 'ACCESS', href: '#system-entry' },
+  { num: '05', label: 'MENU', href: '/menu', isRoute: true },
+  { num: '06', label: 'ACCESS', href: '#system-entry' },
 ];
 
 export default function Nav({ onEnterSystem, isCompact }) {

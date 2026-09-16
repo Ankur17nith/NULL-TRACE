@@ -3,11 +3,11 @@
 // Central controller: mission lifecycle, timer, game loop
 // ============================================================
 
-import MissionEngine from './MissionEngine';
-import PuzzleEngine from './PuzzleEngine';
-import ScoreEngine from './ScoreEngine';
-import NetworkEngine from './NetworkEngine';
-import { GameEvents, eventEngine } from './EventEngine';
+import MissionEngine from './MissionEngine.js';
+import PuzzleEngine from './PuzzleEngine.js';
+import ScoreEngine from './ScoreEngine.js';
+import NetworkEngine from './NetworkEngine.js';
+import { GameEvents, eventEngine } from './EventEngine.js';
 
 class GameEngine {
   constructor(store) {
@@ -39,6 +39,9 @@ class GameEngine {
     // Reset scores for new mission
     this.scoreEngine.resetMissionScore();
     this.scoreEngine.setDifficulty(difficulty);
+    this.puzzleSolvedThisMission = false;
+    this.missionCompletedThisRun = false;
+    this.lastCompletionResult = null;
     state.resetPlayerMissionStats();
     state.clearInventory();
 
@@ -152,6 +155,9 @@ class GameEngine {
    * Handle puzzle solved
    */
   handlePuzzleSolved(result) {
+    if (this.puzzleSolvedThisMission) return { alreadySolved: true, awardedScore: 0 };
+    this.puzzleSolvedThisMission = true;
+
     this.scoreEngine.addPuzzleScore();
     this.puzzleEngine.completePuzzle(result);
 
@@ -163,6 +169,7 @@ class GameEngine {
         this.store.getState().setShowEducational(explanation);
       }
     }
+    return { success: true, awardedScore: 500 };
   }
 
   /**
@@ -199,12 +206,15 @@ class GameEngine {
    * Complete the current mission
    */
   completeMission() {
+    if (this.missionCompletedThisRun) return { ...this.lastCompletionResult, alreadyCompleted: true };
+    this.missionCompletedThisRun = true;
+
     this.stopTimer();
     this.isRunning = false;
 
     const state = this.store.getState();
     const mission = this.missionEngine.getCurrentMission();
-    if (!mission) return;
+    if (!mission) return null;
 
     // Calculate final scores
     const timeRemaining = state.mission.timeRemaining;
@@ -212,7 +222,6 @@ class GameEngine {
     this.scoreEngine.calculateTimeBonus(timeRemaining, totalTime);
 
     const correct = mission.objectives.filter(o => o.completed).length;
-    const total = mission.objectives.length;
     this.scoreEngine.calculateAccuracyBonus(
       correct - state.player.mistakes,
       Math.max(correct, 1)
@@ -235,7 +244,7 @@ class GameEngine {
     // Complete in mission engine
     this.missionEngine.completeMission();
 
-    return {
+    this.lastCompletionResult = {
       breakdown,
       totalScore,
       rank,
@@ -245,6 +254,8 @@ class GameEngine {
         number: mission.number,
       },
     };
+
+    return this.lastCompletionResult;
   }
 
   /**

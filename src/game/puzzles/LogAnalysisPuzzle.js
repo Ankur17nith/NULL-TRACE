@@ -4,19 +4,43 @@
 // ============================================================
 
 class LogAnalysisPuzzle {
-  constructor(config) {
+  constructor(config = {}) {
     this.id = config.id || 'log-puzzle';
     this.logs = config.logs || [];              // Array of log entries
     this.suspiciousEntries = config.suspiciousEntries || []; // Indices of suspicious logs
-    this.questions = config.questions || [];     // Questions about the logs
+    this.questions = (config.questions && config.questions.length > 0) ? config.questions : [
+      {
+        id: 'q1',
+        prompt: 'What attack vector was used against the database interface?',
+        options: ['SQL Injection', 'Cross-Site Scripting (XSS)', 'Buffer Overflow', 'DNS Tunneling'],
+        correctIndex: 0,
+        correctAnswer: 'SQL Injection'
+      },
+      {
+        id: 'q2',
+        prompt: 'Which malicious payload was submitted in the user search parameter?',
+        options: ["' OR 1=1 --", "<script>alert(1)</script>", "admin; cat /etc/passwd", "%00%00%00"],
+        correctIndex: 0,
+        correctAnswer: "' OR 1=1 --"
+      },
+      {
+        id: 'q3',
+        prompt: 'What is the primary mitigation to prevent this class of vulnerability?',
+        options: ['Parameterized queries', 'Client-side input validation', 'Obfuscating database table names', 'Increasing password length'],
+        correctIndex: 0,
+        correctAnswer: 'Parameterized queries'
+      }
+    ];
     this.currentQuestion = 0;
     this.answers = {};
     this.hints = config.hints || [];
     this.hintsUsed = 0;
+    this.attempts = 0;
     this.mistakes = 0;
     this.solved = false;
     this.difficulty = config.difficulty || 'NORMAL';
     this.explanation = config.explanation || null;
+    this.type = 'LOG_ANALYSIS';
   }
 
   /**
@@ -81,10 +105,14 @@ class LogAnalysisPuzzle {
     }
 
     const q = this.questions[questionIndex];
-    const isCorrect = answer.toLowerCase().trim() === q.answer.toLowerCase().trim() ||
-                      (q.acceptedAnswers && q.acceptedAnswers.some(
-                        a => a.toLowerCase().trim() === answer.toLowerCase().trim()
-                      ));
+    const targetAnswer = q.answer || q.correctAnswer || '';
+    const cleanAnswer = (answer || '').toLowerCase().trim();
+    const isCorrect = Boolean(
+      (targetAnswer && cleanAnswer === targetAnswer.toLowerCase().trim()) ||
+      (q.acceptedAnswers && q.acceptedAnswers.some(
+        a => (a || '').toLowerCase().trim() === cleanAnswer
+      ))
+    );
 
     this.answers[questionIndex] = { answer, correct: isCorrect };
 
@@ -102,9 +130,11 @@ class LogAnalysisPuzzle {
     }
 
     return {
-      success: true,
+      success: isCorrect,
       correct: isCorrect,
-      message: isCorrect ? 'CORRECT — Analysis confirmed' : 'INCORRECT — Review the evidence',
+      message: this.solved
+        ? 'ALL QUESTIONS SOLVED — Database breach vector confirmed'
+        : (isCorrect ? 'CORRECT — Analysis confirmed' : 'INCORRECT — Review the evidence'),
       questionIndex,
       allComplete: Object.keys(this.answers).length === this.questions.length,
       solved: this.solved,
@@ -160,6 +190,7 @@ class LogAnalysisPuzzle {
     this.currentQuestion = 0;
     this.answers = {};
     this.hintsUsed = 0;
+    this.attempts = 0;
     this.mistakes = 0;
     this.solved = false;
     this.logs.forEach(l => { l.flagged = false; });

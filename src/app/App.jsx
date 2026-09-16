@@ -7,6 +7,7 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import { useGameStore } from '../state/gameStore';
 import Landing from '../pages/Landing';
 import Game from '../pages/Game';
+import MainMenu from '../pages/MainMenu';
 import MissionSelect from '../pages/MissionSelect';
 import Achievements from '../pages/Achievements';
 import Leaderboard from '../pages/Leaderboard';
@@ -27,6 +28,9 @@ export default function App() {
         <Routes>
           {/* Landing — cinematic scroll experience */}
           <Route path="/" element={<Landing />} />
+
+          {/* Main Menu — dedicated operator hub */}
+          <Route path="/menu" element={<MainMenu />} />
 
           {/* Game — full gameplay mode */}
           <Route path="/game" element={<Game />} />

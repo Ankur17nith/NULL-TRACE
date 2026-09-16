@@ -4,23 +4,27 @@
 // ============================================================
 
 class RoutingPuzzle {
-  constructor(config) {
+  constructor(config = {}) {
     this.id = config.id || 'routing-puzzle';
     this.nodes = config.nodes || [];           // { id, label, x, y, type }
     this.connections = config.connections || []; // { from, to, weight, congested }
-    this.sourceNode = config.sourceNode;
-    this.targetNode = config.targetNode;
-    this.validPaths = config.validPaths || [];  // Array of valid path arrays
+    this.sourceNode = config.sourceNode || 'PLAYER';
+    this.targetNode = config.targetNode || 'ANALYSIS';
+    this.validPaths = config.validPaths || [['PLAYER', 'RTR-A', 'RTR-C', 'RTR-E', 'ANALYSIS']];  // Array of valid path arrays
     this.optimalPath = config.optimalPath || null;
     this.currentPath = [];
     this.hints = config.hints || [];
     this.hintsUsed = 0;
     this.attempts = 0;
+    this.mistakes = 0;
     this.solved = false;
     this.difficulty = config.difficulty || 'NORMAL';
     this.maxHops = config.maxHops || 10;
     this.explanation = config.explanation || null;
     this.packets = [];
+    this.type = 'ROUTING';
+    this.source = this.sourceNode;
+    this.destination = this.targetNode;
   }
 
   /**
@@ -103,10 +107,19 @@ class RoutingPuzzle {
    * @returns {object}
    */
   submitRoute() {
+    if (this.solved) {
+      return {
+        success: false,
+        message: 'Route already established.',
+        attempts: this.attempts,
+      };
+    }
+
     this.attempts++;
 
     // Check if route reaches target
-    if (this.currentPath[this.currentPath.length - 1] !== this.targetNode) {
+    if (this.currentPath.length === 0 || this.currentPath[this.currentPath.length - 1] !== this.targetNode) {
+      this.mistakes++;
       return {
         success: false,
         message: 'ROUTE INCOMPLETE — Packet did not reach destination',
@@ -121,6 +134,7 @@ class RoutingPuzzle {
     );
 
     if (!isValid) {
+      this.mistakes++;
       return {
         success: false,
         message: 'ROUTE INVALID — Path contains errors',
@@ -142,6 +156,26 @@ class RoutingPuzzle {
       attempts: this.attempts,
       hintsUsed: this.hintsUsed,
     };
+  }
+
+  /**
+   * Attempt the routing puzzle with a provided path or currentPath
+   * @param {string[]} [path]
+   * @returns {object}
+   */
+  attempt(path) {
+    if (this.solved) {
+      return {
+        success: false,
+        message: 'Route already established.',
+        attempts: this.attempts,
+      };
+    }
+
+    if (Array.isArray(path)) {
+      this.currentPath = [...path];
+    }
+    return this.submitRoute();
   }
 
   /**

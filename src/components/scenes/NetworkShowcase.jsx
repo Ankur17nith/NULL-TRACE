@@ -4,7 +4,7 @@
 // ============================================================
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { gsap, ScrollTrigger } from '../../animations/scrollManager';
+import { ScrollTrigger } from '../../animations/scrollManager';
 import Sparkle from '../ui/Sparkle';
 
 const NODES = [

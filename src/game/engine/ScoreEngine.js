@@ -3,7 +3,7 @@
 // Score calculation, rank determination, difficulty multipliers
 // ============================================================
 
-import { GameEvents, eventEngine } from './EventEngine';
+import { GameEvents, eventEngine } from './EventEngine.js';
 
 // Rank thresholds (cumulative score across all missions)
 const RANKS = [

@@ -3,12 +3,12 @@
 // Mission lifecycle, objective tracking, completion
 // ============================================================
 
-import mission01 from '../missions/mission01';
-import mission02 from '../missions/mission02';
-import mission03 from '../missions/mission03';
-import mission04 from '../missions/mission04';
-import mission05 from '../missions/mission05';
-import { GameEvents, eventEngine } from './EventEngine';
+import mission01 from '../missions/mission01.js';
+import mission02 from '../missions/mission02.js';
+import mission03 from '../missions/mission03.js';
+import mission04 from '../missions/mission04.js';
+import mission05 from '../missions/mission05.js';
+import { GameEvents, eventEngine } from './EventEngine.js';
 
 const ALL_MISSIONS = [mission01, mission02, mission03, mission04, mission05];
 

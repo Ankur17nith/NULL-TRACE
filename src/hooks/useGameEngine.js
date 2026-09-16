@@ -3,7 +3,6 @@
 // Provides game engine instance to React components
 // ============================================================
 
-import { useRef, useEffect } from 'react';
 import GameEngine from '../game/engine/GameEngine';
 import TerminalEngine from '../game/terminal/TerminalEngine';
 import AchievementEngine from '../game/engine/AchievementEngine';

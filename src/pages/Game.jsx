@@ -3,7 +3,7 @@
 // Primary gameplay container with cinematic briefings, transitions & results
 // ============================================================
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../state/gameStore';
 import { useGameEngine } from '../hooks/useGameEngine';
@@ -13,19 +13,16 @@ import NetworkMap from '../components/NetworkMap/NetworkMap';
 import HTNButton from '../components/ui/HTNButton';
 import Sparkle from '../components/ui/Sparkle';
 import { formatTime, formatScore, formatPercent } from '../utils/formatters';
-import ScoreEngine from '../game/engine/ScoreEngine';
 import './Game.css';
 
 export default function Game() {
   const navigate = useNavigate();
-  const { engine, missionEngine, puzzleEngine, networkEngine, achievementEngine, sound, terminalEngine } = useGameEngine();
+  const { engine, missionEngine, puzzleEngine, achievementEngine, sound, terminalEngine } = useGameEngine();
   const status = useGameStore(s => s.mission.status);
-  const objectives = useGameStore(s => s.mission.objectives);
   const missionNumber = useGameStore(s => s.mission.currentMissionNumber);
   const missionId = useGameStore(s => s.mission.currentMissionId);
   const timeRemaining = useGameStore(s => s.mission.timeRemaining);
   const totalTime = useGameStore(s => s.mission.totalTime);
-  const score = useGameStore(s => s.player.score);
   const hintsUsed = useGameStore(s => s.player.hintsUsed);
   const mistakes = useGameStore(s => s.player.mistakes);
   const cluesFound = useGameStore(s => s.player.cluesFound);
@@ -52,9 +49,9 @@ export default function Game() {
         setResultStep(1);
 
         // Staged reveal steps for cinematic completion feel
-        const t1 = setTimeout(() => setResultStep(2), 500);
-        const t2 = setTimeout(() => setResultStep(3), 1000);
-        const t3 = setTimeout(() => setResultStep(4), 1600);
+        const t1 = setTimeout(() => setResultStep(2), 400);
+        const t2 = setTimeout(() => setResultStep(3), 800);
+        const t3 = setTimeout(() => setResultStep(4), 1200);
 
         achievementEngine.checkAll({
           missionId,
@@ -77,7 +74,7 @@ export default function Game() {
         };
       }
     }
-  }, [status]);
+  }, [status, showResults, engine, missionId, hintsUsed, mistakes, cluesFound, mission?.clues?.length, timeRemaining, totalTime, puzzleEngine, achievementEngine]);
 
   // Redirect if no mission loaded
   useEffect(() => {
@@ -100,16 +97,15 @@ export default function Game() {
       if (puzzle && !puzzle.solved) {
         const result = puzzle.addNodeToRoute(node.id);
         if (result.success) {
+          sound.playKeypress();
           setRoutePath([...puzzle.currentPath]);
-          if (result.isComplete) {
-            const submitResult = puzzle.submitRoute();
-            if (submitResult.success) {
-              sound.playSuccess();
-              engine.handlePuzzleSolved(submitResult);
-              mission?.objectives?.forEach(o => {
-                if (!o.completed) engine.completeObjective(o.id);
-              });
-            }
+          engine.completeObjective('obj-02-1');
+          if (puzzle.currentPath.length > 1) {
+            engine.completeObjective('obj-02-2');
+            engine.completeObjective('obj-02-3');
+          }
+          if (node.id === 'ANALYSIS') {
+            engine.completeObjective('obj-02-4');
           }
         } else {
           sound.playError();
@@ -122,6 +118,10 @@ export default function Game() {
     // Normal inspection
     terminalEngine.execute(`inspect ${node.id}`);
 
+    if (missionNumber === 1 && node.id === 'WS-07') {
+      engine.completeObjective('obj-01-2');
+    }
+
     if (node.status === 'SUSPICIOUS' || node.status === 'COMPROMISED') {
       const undiscovered = (mission?.clues || []).filter(
         c => !inventory.clues.find(ic => ic.id === c.id)
@@ -129,41 +129,162 @@ export default function Game() {
       if (undiscovered.length > 0) {
         engine.discoverClue(undiscovered[0].id);
         sound.playClue();
+        if (missionNumber === 1) engine.completeObjective('obj-01-4');
       }
     }
   }, [missionNumber, puzzleEngine, engine, mission, inventory, sound, terminalEngine]);
 
-  const handlePuzzleSubmit = useCallback((answer) => {
+  const handlePuzzleSubmit = useCallback((action) => {
     const puzzle = puzzleEngine.getCurrentPuzzle();
-    if (!puzzle) return;
+    if (!puzzle) return null;
 
+    const actionType = typeof action === 'object' && action !== null ? action.type : null;
     let result;
-    if (typeof puzzle.attempt === 'function') {
-      result = puzzle.attempt(...(Array.isArray(answer) ? answer : [answer]));
-    } else if (typeof puzzle.answerQuestion === 'function') {
+
+    // 1. Authentication Puzzle
+    if (actionType === 'AUTH' || (action && typeof action.username === 'string')) {
+      const username = action.username || '';
+      const password = action.password || '';
+      result = puzzle.attempt(username, password);
+      if (result.success) {
+        sound.playSuccess();
+        engine.handlePuzzleSolved(result);
+        engine.completeObjective('obj-01-5');
+        engine.completeObjective('obj-01-1');
+        engine.completeObjective('obj-01-2');
+        engine.completeObjective('obj-01-3');
+        engine.completeObjective('obj-01-4');
+      } else {
+        sound.playError();
+        engine.handleMistake();
+      }
+      return result;
+    }
+
+    // 2. Routing Puzzle
+    if (actionType === 'ROUTE') {
+      result = puzzle.submitRoute();
+      if (result.success) {
+        sound.playSuccess();
+        engine.handlePuzzleSolved(result);
+        engine.completeObjective('obj-02-4');
+        engine.completeObjective('obj-02-5');
+        engine.completeObjective('obj-02-1');
+        engine.completeObjective('obj-02-2');
+        engine.completeObjective('obj-02-3');
+      } else {
+        sound.playError();
+        engine.handleMistake();
+      }
+      return result;
+    }
+
+    // 3. Binary Puzzle
+    if (actionType === 'BINARY' || (typeof action === 'string' && missionNumber === 3)) {
+      const answer = actionType === 'BINARY' ? action.answer : action;
+      result = puzzle.attempt(answer);
+      if (result.success) {
+        sound.playSuccess();
+        engine.handlePuzzleSolved(result);
+        engine.completeObjective('obj-03-4');
+        engine.completeObjective('obj-03-5');
+        engine.completeObjective('obj-03-1');
+        engine.completeObjective('obj-03-2');
+        engine.completeObjective('obj-03-3');
+      } else {
+        sound.playError();
+        engine.handleMistake();
+      }
+      return result;
+    }
+
+    // 4. Log Analysis Puzzle
+    if (actionType === 'LOG_QUESTION' || (typeof action === 'string' && missionNumber === 4)) {
+      const answer = actionType === 'LOG_QUESTION' ? action.answer : action;
       const q = puzzle.getCurrentQuestion();
       if (q) {
         result = puzzle.answerQuestion(q.index, answer);
-        if (result.correct && !result.solved) {
-          puzzle.advanceQuestion();
+        if (result.correct) {
+          sound.playSuccess();
+          if (q.index === 0) engine.completeObjective('obj-04-3');
+          if (q.index === 1) engine.completeObjective('obj-04-4');
+          if (q.index === 2) engine.completeObjective('obj-04-5');
+          if (!result.solved) {
+            puzzle.advanceQuestion();
+          } else {
+            engine.handlePuzzleSolved(result);
+            engine.completeObjective('obj-04-1');
+            engine.completeObjective('obj-04-2');
+          }
+        } else {
+          sound.playError();
+          engine.handleMistake();
         }
       }
+      return result;
     }
 
-    if (result?.success || result?.correct) {
-      sound.playSuccess();
-      if (result.solved || result.success) {
-        engine.handlePuzzleSolved(result);
-        mission?.objectives?.forEach(o => {
-          if (!o.completed) engine.completeObjective(o.id);
-        });
+    // 5. Investigation Puzzle
+    if (actionType === 'INVESTIGATION_ADVANCE') {
+      result = puzzle.advanceToIdentify();
+      if (result.success) {
+        sound.playSuccess();
+        engine.completeObjective('obj-05-1');
+      } else {
+        sound.playError();
       }
-    } else {
-      sound.playError();
-      engine.handleMistake();
+      return result;
     }
-    return result;
-  }, [puzzleEngine, engine, mission, sound]);
+
+    if (actionType === 'INVESTIGATION_CONCLUSION') {
+      result = puzzle.submitConclusion(action.questionId, action.answer);
+      if (result.correct) {
+        sound.playSuccess();
+        if (action.questionId === 'compromised_machine') engine.completeObjective('obj-05-2');
+        if (action.questionId === 'entry_method') engine.completeObjective('obj-05-3');
+        if (action.questionId === 'attack_route' || action.questionId === 'current_target') {
+          engine.completeObjective('obj-05-4');
+        }
+      } else {
+        sound.playError();
+        engine.handleMistake();
+      }
+      return result;
+    }
+
+    if (actionType === 'INVESTIGATION_ISOLATE') {
+      result = puzzle.isolateNode(action.nodeId);
+      if (result.success) {
+        sound.playMissionComplete();
+        engine.handlePuzzleSolved(result);
+        engine.completeObjective('obj-05-5');
+        engine.completeObjective('obj-05-1');
+        engine.completeObjective('obj-05-2');
+        engine.completeObjective('obj-05-3');
+        engine.completeObjective('obj-05-4');
+      } else {
+        sound.playError();
+        engine.handleMistake();
+      }
+      return result;
+    }
+
+    // Generic fallback for any other attempts
+    if (typeof puzzle.attempt === 'function') {
+      const args = Array.isArray(action) ? action : [action];
+      result = puzzle.attempt(...args);
+      if (result?.success) {
+        sound.playSuccess();
+        engine.handlePuzzleSolved(result);
+      } else {
+        sound.playError();
+        engine.handleMistake();
+      }
+      return result;
+    }
+
+    return null;
+  }, [puzzleEngine, engine, missionNumber, sound]);
 
   const handleHint = () => {
     const puzzle = puzzleEngine.getCurrentPuzzle();
@@ -181,8 +302,13 @@ export default function Game() {
     setShowResults(false);
     setMissionResult(null);
     setRoutePath([]);
+    const currentPuz = puzzleEngine.getCurrentPuzzle();
+    if (currentPuz?.reset) {
+      currentPuz.reset();
+    }
     engine.startMission(missionId);
     setShowBriefing(true);
+    setActivePanel('terminal');
   };
 
   const handleNextMission = () => {
@@ -326,6 +452,7 @@ export default function Game() {
           )}
 
           {/* Step 4: Actions */}
+          {/* Step 4: Actions */}
           {resultStep >= 4 && (
             <div className="results-action-row">
               {status === 'COMPLETED' && missionEngine.getNextMission() && (
@@ -338,10 +465,13 @@ export default function Game() {
                   VIEW FINAL EVALUATION →
                 </HTNButton>
               )}
+              <HTNButton variant="blue" size="md" onClick={() => navigate('/missions')}>
+                MISSION SELECT
+              </HTNButton>
               <HTNButton variant="secondary" size="md" onClick={handleRetry}>
                 RETRY MISSION
               </HTNButton>
-              <HTNButton variant="secondary" size="md" onClick={() => navigate('/')}>
+              <HTNButton variant="secondary" size="md" onClick={() => navigate('/menu')}>
                 MAIN MENU
               </HTNButton>
             </div>
@@ -368,8 +498,11 @@ export default function Game() {
             <HTNButton variant="coral" size="lg" onClick={handleRetry}>
               RETRY INVESTIGATION
             </HTNButton>
-            <HTNButton variant="secondary" size="md" onClick={() => navigate('/')}>
-              RETURN TO SYSTEM MENU
+            <HTNButton variant="blue" size="md" onClick={() => navigate('/missions')}>
+              MISSION SELECT
+            </HTNButton>
+            <HTNButton variant="secondary" size="md" onClick={() => navigate('/menu')}>
+              RETURN TO MAIN MENU
             </HTNButton>
           </div>
         </div>
@@ -426,27 +559,73 @@ export default function Game() {
   // ── Puzzle Interaction Panel ──────────────────────────────
   const puzzle = puzzleEngine.getCurrentPuzzle();
   const renderPuzzlePanel = () => {
-    if (!puzzle || puzzle.solved) return null;
+    if (!puzzle) {
+      return (
+        <div className="puzzle-panel">
+          <div className="panel__header">ACTIVE PUZZLE</div>
+          <div className="panel__body">
+            <p className="puzzle-help-text">No active puzzle configured for this operation.</p>
+          </div>
+        </div>
+      );
+    }
 
-    if (puzzle.constructor.name === 'AuthenticationPuzzle') {
+    if (puzzle.solved) {
+      return (
+        <div className="puzzle-panel">
+          <div className="panel__header" style={{ color: 'var(--htn-mint)' }}>PUZZLE SOLVED // OBJECTIVE COMPLETE</div>
+          <div className="panel__body">
+            <p style={{ color: 'var(--htn-mint)', fontSize: '1.05rem', fontWeight: 'bold' }}>
+              ✓ ACCESS GRANTED — Security challenge successfully neutralized.
+            </p>
+            <p className="puzzle-help-text" style={{ marginTop: '0.5rem' }}>
+              All puzzle criteria satisfied for this sector. Proceed with any remaining mission directives.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    const puzzleType = puzzle.type || puzzle.constructor?.name;
+
+    if (puzzleType === 'AUTHENTICATION' || puzzle.constructor?.name === 'AuthenticationPuzzle') {
       return <AuthPanel puzzle={puzzle} onSubmit={handlePuzzleSubmit} />;
     }
-    if (puzzle.constructor.name === 'BinaryPuzzle') {
-      return <BinaryPanel puzzle={puzzle} onSubmit={handlePuzzleSubmit} />;
+    if (puzzleType === 'ROUTING' || puzzle.constructor?.name === 'RoutingPuzzle') {
+      return (
+        <RoutingPanel
+          puzzle={puzzle}
+          onSubmit={handlePuzzleSubmit}
+          routePath={routePath}
+          setRoutePath={setRoutePath}
+          sound={sound}
+        />
+      );
     }
-    if (puzzle.constructor.name === 'LogAnalysisPuzzle') {
+    if (puzzleType === 'BINARY' || puzzle.constructor?.name === 'BinaryPuzzle') {
+      return <BinaryPanel puzzle={puzzle} onSubmit={handlePuzzleSubmit} sound={sound} />;
+    }
+    if (puzzleType === 'LOG_ANALYSIS' || puzzle.constructor?.name === 'LogAnalysisPuzzle') {
       return <LogAnalysisPanel puzzle={puzzle} onSubmit={handlePuzzleSubmit} />;
     }
-    if (puzzle.constructor.name === 'InvestigationPuzzle') {
+    if (puzzleType === 'INVESTIGATION' || puzzle.constructor?.name === 'InvestigationPuzzle') {
       return <InvestigationPanel puzzle={puzzle} onSubmit={handlePuzzleSubmit} engine={engine} sound={sound} />;
     }
-    return null;
+
+    return (
+      <div className="puzzle-panel">
+        <div className="panel__header">UNKNOWN PUZZLE</div>
+        <div className="panel__body">
+          <p className="auth-message--error">Unknown puzzle type encountered: {puzzleType || 'UNSPECIFIED'}</p>
+        </div>
+      </div>
+    );
   };
 
   // ── Main Gameplay Layout ──────────────────────────────────
   return (
     <div className="game-layout">
-      <MissionHUD onAbort={() => navigate('/')} />
+      <MissionHUD onAbort={() => navigate('/missions')} />
 
       <div className="game-content">
         {/* Left: Terminal or Active Panel */}
@@ -471,26 +650,48 @@ export default function Game() {
       <div className="game-toolbar" role="toolbar" aria-label="Game workspaces">
         <button
           className={`game-toolbar__btn ${activePanel === 'terminal' ? 'game-toolbar__btn--active' : ''}`}
-          onClick={() => setActivePanel('terminal')}
+          onClick={() => {
+            setActivePanel('terminal');
+            if (missionNumber === 3) engine.completeObjective('obj-03-1');
+            if (missionNumber === 4) engine.completeObjective('obj-04-1');
+          }}
         >
           <span className="toolbar-icon">_&gt;</span> TERMINAL
         </button>
         <button
           className={`game-toolbar__btn ${activePanel === 'puzzle' ? 'game-toolbar__btn--active' : ''}`}
-          onClick={() => setActivePanel('puzzle')}
-          disabled={!puzzle || puzzle.solved}
+          onClick={() => {
+            setActivePanel('puzzle');
+            if (missionNumber === 3) {
+              engine.completeObjective('obj-03-1');
+              engine.completeObjective('obj-03-2');
+            }
+            if (missionNumber === 4) {
+              engine.completeObjective('obj-04-1');
+            }
+          }}
+          disabled={!puzzle}
         >
           <span className="toolbar-icon">⬡</span> PUZZLE
         </button>
         <button
           className={`game-toolbar__btn ${activePanel === 'logs' ? 'game-toolbar__btn--active' : ''}`}
-          onClick={() => setActivePanel('logs')}
+          onClick={() => {
+            setActivePanel('logs');
+            if (missionNumber === 1) engine.completeObjective('obj-01-3');
+            if (missionNumber === 4) engine.completeObjective('obj-04-2');
+            if (missionNumber === 5) engine.completeObjective('obj-05-1');
+          }}
         >
           <span className="toolbar-icon">◈</span> LOGS
         </button>
         <button
           className={`game-toolbar__btn ${activePanel === 'inventory' ? 'game-toolbar__btn--active' : ''}`}
-          onClick={() => setActivePanel('inventory')}
+          onClick={() => {
+            setActivePanel('inventory');
+            if (missionNumber === 1 && inventory.clues.length > 0) engine.completeObjective('obj-01-4');
+            if (missionNumber === 5) engine.completeObjective('obj-05-1');
+          }}
         >
           <span className="toolbar-icon">▣</span> CLUES ({inventory.clues.length})
         </button>
@@ -504,7 +705,7 @@ export default function Game() {
   );
 }
 
-// ── Inline Sub-components (Auth, Binary, LogAnalysis, Investigation, Logs, Inventory) ──
+// ── Inline Sub-components (Auth, Routing, Binary, LogAnalysis, Investigation, Logs, Inventory) ──
 
 function AuthPanel({ puzzle, onSubmit }) {
   const [username, setUsername] = useState('');
@@ -514,10 +715,10 @@ function AuthPanel({ puzzle, onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const result = puzzle.attempt(username, password);
-    setMessage(result.message);
-    if (result.success) {
-      onSubmit([username, password]);
+    if (!username.trim() || !password.trim()) return;
+    const result = onSubmit({ type: 'AUTH', username, password });
+    if (result?.message) {
+      setMessage(result.message);
     }
   };
 
@@ -548,7 +749,112 @@ function AuthPanel({ puzzle, onSubmit }) {
   );
 }
 
-function BinaryPanel({ puzzle, onSubmit }) {
+function RoutingPanel({ puzzle, onSubmit, routePath, setRoutePath, sound }) {
+  const [message, setMessage] = useState('');
+  const currentPath = routePath.length > 0 ? routePath : puzzle.currentPath;
+
+  const handleAddNode = (nodeId) => {
+    const res = puzzle.addNodeToRoute(nodeId);
+    if (res.success) {
+      sound?.playKeypress();
+      setRoutePath([...puzzle.currentPath]);
+      setMessage('');
+    } else {
+      sound?.playError();
+      setMessage(res.message);
+    }
+  };
+
+  const handleReset = () => {
+    sound?.playKeypress();
+    puzzle.clearRoute();
+    setRoutePath([]);
+    setMessage('');
+  };
+
+  const handleSubmit = () => {
+    const result = onSubmit({ type: 'ROUTE' });
+    if (result?.message) {
+      setMessage(result.message);
+    }
+  };
+
+  const lastNode = currentPath.length > 0 ? currentPath[currentPath.length - 1] : null;
+  const nextHops = lastNode ? puzzle.getAdjacentNodes(lastNode) : [puzzle.sourceNode];
+
+  return (
+    <div className="puzzle-panel">
+      <div className="panel__header">ROUTE PACKET // ANALYSIS DISPATCH</div>
+      <div className="panel__body">
+        <div style={{ marginBottom: '0.75rem' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '0.05em' }}>SOURCE:</div>
+          <div style={{ fontWeight: 'bold', color: 'var(--htn-mint)' }}>PLAYER (10.0.0.12)</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)', letterSpacing: '0.05em', marginTop: '0.25rem' }}>DESTINATION:</div>
+          <div style={{ fontWeight: 'bold', color: 'var(--htn-yellow)' }}>ANALYSIS-SRV (10.0.0.50)</div>
+        </div>
+
+        <p className="puzzle-help-text">
+          Select intermediate network nodes to construct an optimal route without hitting congested links.
+        </p>
+
+        {/* Selected Route Path Display */}
+        <div className="routing-display" style={{ background: 'var(--bg-surface)', padding: '0.75rem', borderRadius: '12px', margin: '0.75rem 0' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', marginBottom: '0.25rem' }}>CURRENT ROUTE:</div>
+          <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: 'var(--htn-blue)', minHeight: '1.5rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px' }}>
+            {currentPath.length === 0 ? (
+              <span style={{ color: 'var(--text-dim)', fontStyle: 'italic' }}>No route selected. Click {puzzle.sourceNode} or select on the network map.</span>
+            ) : (
+              currentPath.map((n, i) => (
+                <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{ background: 'var(--bg-elevated)', padding: '2px 8px', borderRadius: '6px', border: '1px solid var(--border-default)' }}>
+                    {n}
+                  </span>
+                  {i < currentPath.length - 1 && <span style={{ color: 'var(--text-dim)' }}>→</span>}
+                </span>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Node selector buttons */}
+        {!puzzle.solved && (
+          <div style={{ margin: '0.75rem 0' }}>
+            <label className="auth-label">AVAILABLE NEXT HOPS</label>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginTop: '0.25rem' }}>
+              {nextHops.length === 0 ? (
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>Destination reached or no further hops. Click Submit Route.</span>
+              ) : (
+                nextHops.map(n => (
+                  <HTNButton key={n} variant="blue" size="sm" onClick={() => handleAddNode(n)}>
+                    + {n}
+                  </HTNButton>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Action buttons */}
+        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
+          <HTNButton variant="secondary" size="md" onClick={handleReset} style={{ flex: 1 }}>
+            RESET ROUTE
+          </HTNButton>
+          <HTNButton variant="mint" size="md" onClick={handleSubmit} disabled={puzzle.solved || currentPath.length === 0} style={{ flex: 2 }}>
+            SUBMIT ROUTE
+          </HTNButton>
+        </div>
+
+        {message && (
+          <div className={`auth-message ${message.includes('DELIVERED') || message.includes('VALID') ? 'auth-message--success' : 'auth-message--error'}`} style={{ marginTop: '0.75rem' }}>
+            {message}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function BinaryPanel({ puzzle, onSubmit, sound }) {
   const [answer, setAnswer] = useState('');
   const [toolResult, setToolResult] = useState('');
   const [toolInput, setToolInput] = useState('');
@@ -558,6 +864,7 @@ function BinaryPanel({ puzzle, onSubmit }) {
   const encoded = puzzle.getEncodedValues();
 
   const handleUseTool = () => {
+    sound?.playKeypress();
     const result = puzzle.useTool(toolInput, selectedTool);
     if (result.error) {
       setToolResult(`ERROR: ${result.error}`);
@@ -568,9 +875,11 @@ function BinaryPanel({ puzzle, onSubmit }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const result = puzzle.attempt(answer);
-    setMessage(result.message);
-    if (result.success) onSubmit(answer);
+    if (!answer.trim()) return;
+    const result = onSubmit({ type: 'BINARY', answer });
+    if (result?.message) {
+      setMessage(result.message);
+    }
   };
 
   return (
@@ -601,7 +910,7 @@ function BinaryPanel({ puzzle, onSubmit }) {
           <label className="auth-label">DECRYPTED PASSPHRASE</label>
           <div className="auth-field" style={{flexDirection: 'row', gap: '0.5rem'}}>
             <input className="input" value={answer} onChange={e => setAnswer(e.target.value.toUpperCase())} placeholder="DECODED TEXT" />
-            <HTNButton variant="mint" size="md" type="submit">UNLOCK</HTNButton>
+            <HTNButton variant="mint" size="md" type="submit" disabled={puzzle.solved}>UNLOCK</HTNButton>
           </div>
           {message && <div className={`auth-message ${message.includes('ACCEPTED') ? 'auth-message--success' : 'auth-message--error'}`}>{message}</div>}
         </form>
@@ -618,11 +927,13 @@ function LogAnalysisPanel({ puzzle, onSubmit }) {
 
   const handleSubmit = () => {
     if (!selectedOption) return;
-    const result = onSubmit(selectedOption);
-    setMessage(result?.correct ? 'CORRECT — Incident footprint confirmed' : 'INCORRECT — Re-examine the network anomalies');
-    if (result?.correct && !result?.solved) {
+    const result = onSubmit({ type: 'LOG_QUESTION', answer: selectedOption });
+    if (result?.correct) {
+      setMessage('CORRECT — Incident footprint confirmed');
       setSelectedOption('');
-      setMessage('');
+      setTimeout(() => setMessage(''), 1000);
+    } else {
+      setMessage('INCORRECT — Re-examine the network anomalies');
     }
   };
 
@@ -630,7 +941,9 @@ function LogAnalysisPanel({ puzzle, onSubmit }) {
     return (
       <div className="puzzle-panel">
         <div className="panel__header">DATABASE FORENSICS</div>
-        <div className="panel__body"><p style={{color: 'var(--accent)'}}>ANALYSIS VERIFIED — Attack vector completely mapped.</p></div>
+        <div className="panel__body">
+          <p style={{color: 'var(--htn-mint)', fontWeight: 'bold'}}>ANALYSIS VERIFIED — Attack vector completely mapped.</p>
+        </div>
       </div>
     );
   }
@@ -658,9 +971,10 @@ function LogAnalysisPanel({ puzzle, onSubmit }) {
   );
 }
 
-function InvestigationPanel({ puzzle, onSubmit, engine, sound }) {
+function InvestigationPanel({ puzzle, onSubmit, sound }) {
   const [answer, setAnswer] = useState('');
   const [message, setMessage] = useState('');
+  const [isolationBanner, setIsolationBanner] = useState(false);
   const state = puzzle.getState();
   const phase = puzzle.getCurrentPhase();
   const conclusions = puzzle.conclusions || [];
@@ -668,35 +982,59 @@ function InvestigationPanel({ puzzle, onSubmit, engine, sound }) {
 
   const currentConclusion = conclusions.find(c => !answered[c.id]?.correct);
 
+  const handleAdvance = () => {
+    sound?.playKeypress();
+    const result = onSubmit({ type: 'INVESTIGATION_ADVANCE' });
+    if (!result?.success) {
+      setMessage(result?.message || 'Evidence threshold not met.');
+    } else {
+      setMessage('');
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!currentConclusion) return;
-    const result = puzzle.submitConclusion(currentConclusion.id, answer);
-    setMessage(result.message);
-    if (result.correct) {
-      sound.playSuccess();
+    if (!currentConclusion || !answer.trim()) return;
+    const result = onSubmit({ type: 'INVESTIGATION_CONCLUSION', questionId: currentConclusion.id, answer: answer.trim() });
+    if (result?.correct) {
       setAnswer('');
       setMessage('');
       if (result.allIdentified) {
         setMessage('ALL BREACH VECTORS IDENTIFIED — Proceeding to node containment');
       }
     } else {
-      sound.playError();
-      engine.handleMistake();
+      setMessage(result?.message || 'ANALYSIS INCORRECT — Review the evidence');
     }
   };
 
   const handleIsolate = () => {
-    const result = puzzle.isolateNode(answer.toUpperCase());
-    setMessage(result.message);
-    if (result.success) {
-      sound.playMissionComplete();
-      onSubmit(answer);
+    if (!answer.trim()) return;
+    const result = onSubmit({ type: 'INVESTIGATION_ISOLATE', nodeId: answer.trim().toUpperCase() });
+    if (result?.success) {
+      setIsolationBanner(true);
+      setMessage(result.message);
     } else {
-      sound.playError();
-      engine.handleMistake();
+      setMessage(result?.message || 'ISOLATION FAILED — Wrong node targeted');
     }
   };
+
+  if (isolationBanner) {
+    return (
+      <div className="puzzle-panel">
+        <div className="panel__header" style={{ color: 'var(--htn-mint)' }}>SECURITY COUNTERMEASURE // SUCCESS</div>
+        <div className="panel__body" style={{ textAlign: 'center', padding: '1.5rem 1rem' }}>
+          <div style={{ color: 'var(--htn-mint)', fontWeight: 'bold', fontSize: '1.2rem', lineHeight: '1.6' }}>
+            CONNECTION TERMINATED<br />
+            CORE SYSTEM RESTORED<br />
+            TRACE COMPLETE
+          </div>
+          <p className="puzzle-help-text" style={{ marginTop: '1rem' }}>
+            Threat neutralized. Exfiltrator link severed. Opening final incident debrief...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   if (phase === 'INVESTIGATE') {
     return (
@@ -704,19 +1042,12 @@ function InvestigationPanel({ puzzle, onSubmit, engine, sound }) {
         <div className="panel__header">CRITICAL INCIDENT // EVIDENCE GATHERING</div>
         <div className="panel__body">
           <p className="puzzle-help-text">
-            The adversary has penetrated POLYNET infrastructure. Use the terminal commands (<strong>scan</strong>, <strong>inspect [NODE]</strong>, <strong>logs</strong>) to trace their exact movements.
+            The adversary has penetrated POLYNET infrastructure. Use the terminal commands (<strong>scan</strong>, <strong>inspect [NODE]</strong>, <strong>logs</strong>) or click suspicious network nodes to trace their exact movements.
           </p>
           <div className="investigation-evidence-counter">
             CLUES DISCOVERED: {state.cluesDiscovered} / {state.totalClues}
           </div>
-          <HTNButton variant="yellow" size="md" className="w-full" onClick={() => {
-            const result = puzzle.advanceToIdentify();
-            if (result.success) {
-              setMessage('');
-            } else {
-              setMessage(result.message);
-            }
-          }}>
+          <HTNButton variant="yellow" size="md" className="w-full" onClick={handleAdvance}>
             COMPILE DOSSIER & IDENTIFY ACTOR
           </HTNButton>
           {message && <div className="auth-message auth-message--error">{message}</div>}
@@ -733,10 +1064,10 @@ function InvestigationPanel({ puzzle, onSubmit, engine, sound }) {
           <form onSubmit={handleSubmit}>
             <p className="puzzle-question">{currentConclusion.question}</p>
             <input className="input" value={answer} onChange={e => setAnswer(e.target.value)} placeholder="Type finding or node ID..." autoFocus />
-            <HTNButton variant="mint" size="md" className="w-full" type="submit" style={{marginTop: '0.75rem'}}>
+            <HTNButton variant="mint" size="md" className="w-full" type="submit" style={{marginTop: '0.75rem'}} disabled={!answer.trim()}>
               CONFIRM ATTRIBUTION
             </HTNButton>
-            {message && <div className={`auth-message ${message.includes('CONFIRMED') ? 'auth-message--success' : 'auth-message--error'}`}>{message}</div>}
+            {message && <div className={`auth-message ${message.includes('CONFIRMED') || message.includes('IDENTIFIED') ? 'auth-message--success' : 'auth-message--error'}`}>{message}</div>}
           </form>
         </div>
       </div>
@@ -752,11 +1083,11 @@ function InvestigationPanel({ puzzle, onSubmit, engine, sound }) {
             CORE MAINFRAME IN IMMEDIATE JEOPARDY!
           </p>
           <p className="puzzle-help-text">
-            Enter the exact Node ID of the pivot bridge that connects the infiltrator to the core server:
+            Enter the exact Node ID of the pivot bridge that connects the infiltrator to the core server (e.g. DB-02):
           </p>
           <div style={{display:'flex', gap:'0.5rem', marginTop:'0.5rem'}}>
-            <input className="input" value={answer} onChange={e => setAnswer(e.target.value.toUpperCase())} placeholder="e.g. WS-01" />
-            <HTNButton variant="coral" size="md" onClick={handleIsolate}>SEVER LINK</HTNButton>
+            <input className="input" value={answer} onChange={e => setAnswer(e.target.value.toUpperCase())} placeholder="e.g. DB-02" />
+            <HTNButton variant="coral" size="md" onClick={handleIsolate} disabled={!answer.trim()}>SEVER LINK</HTNButton>
           </div>
           {message && <div className={`auth-message ${message.includes('TERMINATED') ? 'auth-message--success' : 'auth-message--error'}`}>{message}</div>}
         </div>

@@ -4,21 +4,43 @@
 // ============================================================
 
 class InvestigationPuzzle {
-  constructor(config) {
+  constructor(config = {}) {
     this.id = config.id || 'investigation-puzzle';
     this.clues = config.clues || [];                // Array of clue objects
     this.discoveredClues = new Set();
-    this.conclusions = config.conclusions || [];     // Array of required conclusions
+    this.conclusions = (config.conclusions && config.conclusions.length > 0) ? config.conclusions : [
+      {
+        id: 'compromised_machine',
+        question: 'Which machine was initially compromised?',
+        acceptedAnswers: ['WORKSTATION-07', 'WS-07', 'workstation-07', 'ws-07'],
+      },
+      {
+        id: 'entry_method',
+        question: 'How did the attacker enter the network?',
+        acceptedAnswers: ['Default credentials', 'default credentials', 'default password', 'brute force', 'weak password', 'admin123'],
+      },
+      {
+        id: 'attack_route',
+        question: 'What route did the attacker use? (Entry → Target)',
+        acceptedAnswers: ['WS-07 → DB-02 → CORE', 'WS-07, DB-02, CORE', 'WORKSTATION-07 → DATABASE-02 → CORE-SRV', 'ws-07 db-02 core'],
+      },
+      {
+        id: 'current_target',
+        question: 'Which system is currently being compromised?',
+        acceptedAnswers: ['CORE-SRV', 'CORE', 'core-srv', 'core server', 'Core Server'],
+      },
+    ];
     this.submittedConclusions = {};
     this.timeline = config.timeline || [];           // Timeline events
     this.suspects = config.suspects || [];           // Suspect nodes/IPs
-    this.correctSuspect = config.correctSuspect;     // The answer
-    this.correctMethod = config.correctMethod;       // How attacker entered
-    this.correctRoute = config.correctRoute;         // Route used
-    this.correctTarget = config.correctTarget;       // Current target
-    this.isolation = config.isolation || null;        // Node to isolate
+    this.correctSuspect = config.correctSuspect || 'WS-07';     // The answer
+    this.correctMethod = config.correctMethod || 'Default credentials';       // How attacker entered
+    this.correctRoute = config.correctRoute || 'WS-07 → DB-02 → CORE';         // Route used
+    this.correctTarget = config.correctTarget || 'CORE-SRV';       // Current target
+    this.isolation = config.isolation || 'DB-02';        // Node to isolate
     this.hints = config.hints || [];
     this.hintsUsed = 0;
+    this.attempts = 0;
     this.mistakes = 0;
     this.solved = false;
     this.isolated = false;
@@ -26,6 +48,11 @@ class InvestigationPuzzle {
     this.explanation = config.explanation || null;
     this.phases = ['INVESTIGATE', 'IDENTIFY', 'ISOLATE'];
     this.currentPhase = 0;
+    this.type = 'INVESTIGATION';
+  }
+
+  get phase() {
+    return this.phases[this.currentPhase];
   }
 
   /**
@@ -52,16 +79,39 @@ class InvestigationPuzzle {
 
   /**
    * Submit a conclusion for one of the investigation questions
-   * @param {string} questionId - e.g., 'compromised_machine', 'entry_method', 'route_used', 'current_target'
-   * @param {string} answer
+   * @param {string|object} questionId - e.g., 'compromised_machine', or object of findings
+   * @param {string} [answer]
    * @returns {object}
    */
   submitConclusion(questionId, answer) {
+    if (typeof questionId === 'object' && questionId !== null) {
+      const mapping = {
+        initialCompromised: 'compromised_machine',
+        entryMethod: 'entry_method',
+        attackRoute: 'attack_route',
+        currentTarget: 'current_target',
+      };
+      let anyFailed = false;
+      for (const [key, val] of Object.entries(questionId)) {
+        const actualId = mapping[key] || key;
+        const res = this.submitConclusion(actualId, val);
+        if (!res.correct) {
+          anyFailed = true;
+        }
+      }
+      return {
+        success: !anyFailed,
+        allIdentified: this.conclusions.every(c => this.submittedConclusions[c.id]?.correct),
+        phase: this.phases[this.currentPhase],
+      };
+    }
+
     const conclusion = this.conclusions.find(c => c.id === questionId);
     if (!conclusion) return { success: false, message: 'Unknown question' };
 
+    const cleanInput = (answer || '').toLowerCase().trim();
     const isCorrect = conclusion.acceptedAnswers.some(
-      a => a.toLowerCase().trim() === answer.toLowerCase().trim()
+      a => (a || '').toLowerCase().trim() === cleanInput
     );
 
     this.submittedConclusions[questionId] = { answer, correct: isCorrect };
@@ -69,7 +119,7 @@ class InvestigationPuzzle {
     if (!isCorrect) {
       this.mistakes++;
       return {
-        success: true,
+        success: false,
         correct: false,
         message: 'ANALYSIS INCORRECT — Review the evidence',
         questionId,
@@ -81,7 +131,7 @@ class InvestigationPuzzle {
       c => this.submittedConclusions[c.id]?.correct
     );
 
-    if (allCorrect && this.currentPhase === 1) {
+    if (allCorrect) {
       this.currentPhase = 2; // Move to ISOLATE phase
     }
 
@@ -117,16 +167,22 @@ class InvestigationPuzzle {
    * @returns {object}
    */
   isolateNode(nodeId) {
+    if (this.solved || this.isolated) {
+      return { success: false, message: 'Target already isolated.' };
+    }
+
     if (this.currentPhase !== 2) {
       return { success: false, message: 'Must identify the attacker first' };
     }
 
-    if (nodeId === this.isolation) {
+    const target = (typeof this.isolation === 'string' ? this.isolation : this.isolation?.target) || 'DB-02';
+    const cleanId = (nodeId || '').toUpperCase().trim();
+    if (cleanId === target.toUpperCase().trim()) {
       this.isolated = true;
       this.solved = true;
       return {
         success: true,
-        message: 'CONNECTION TERMINATED — CORE SYSTEM RESTORED',
+        message: 'CONNECTION TERMINATED\nCORE SYSTEM RESTORED\nTRACE COMPLETE',
         solved: true,
       };
     }
@@ -193,6 +249,7 @@ class InvestigationPuzzle {
     this.discoveredClues.clear();
     this.submittedConclusions = {};
     this.hintsUsed = 0;
+    this.attempts = 0;
     this.mistakes = 0;
     this.solved = false;
     this.isolated = false;

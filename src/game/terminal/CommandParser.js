@@ -3,7 +3,7 @@
 // Tokenize and validate terminal input
 // ============================================================
 
-import { sanitizeCommand } from '../../utils/validators';
+import { sanitizeCommand } from '../../utils/validators.js';
 
 class CommandParser {
   /**

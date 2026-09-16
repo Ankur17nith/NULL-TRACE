@@ -15,7 +15,6 @@ export default function MainMenu() {
   const navigate = useNavigate();
   const { engine } = useGameEngine();
   const callsign = useGameStore(s => s.player.callsign);
-  const totalScore = useGameStore(s => s.player.totalScore);
   const rank = useGameStore(s => s.player.rank);
   const completedMissions = useGameStore(s => s.progress.completedMissions);
   const setCallsign = useGameStore(s => s.setCallsign);
@@ -160,11 +159,17 @@ export default function MainMenu() {
             <button className="btn btn--lg w-full" onClick={() => { initSound(); navigate('/achievements'); }} id="btn-achievements">
               ACHIEVEMENTS
             </button>
+            <button className="btn btn--lg w-full" onClick={() => { initSound(); navigate('/archive'); }} id="btn-archive">
+              ARCHIVE
+            </button>
             <button className="btn btn--lg w-full" onClick={() => { initSound(); navigate('/settings'); }} id="btn-settings">
               SETTINGS
             </button>
             <button className="btn btn--lg btn--ghost w-full" onClick={handleDemo} id="btn-demo">
               ▶ START DEMO
+            </button>
+            <button className="btn btn--sm btn--ghost w-full" onClick={() => { initSound(); navigate('/'); }} id="btn-home" style={{ marginTop: '8px' }}>
+              ← SYSTEM HOME
             </button>
           </nav>
         )}

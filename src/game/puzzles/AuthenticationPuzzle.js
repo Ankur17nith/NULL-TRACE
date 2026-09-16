@@ -4,19 +4,21 @@
 // ============================================================
 
 class AuthenticationPuzzle {
-  constructor(config) {
+  constructor(config = {}) {
     this.id = config.id || 'auth-puzzle';
-    this.username = config.username;
-    this.password = config.password;
+    this.username = config.username || 'admin';
+    this.password = config.password || 'admin123';
     this.clues = config.clues || [];
     this.hints = config.hints || [];
     this.maxAttempts = config.maxAttempts || 5;
     this.attempts = 0;
+    this.mistakes = 0;
     this.hintsUsed = 0;
     this.solved = false;
     this.failed = false;
     this.difficulty = config.difficulty || 'NORMAL';
     this.explanation = config.explanation || null;
+    this.type = 'AUTHENTICATION';
   }
 
   attempt(username, password) {
@@ -24,10 +26,15 @@ class AuthenticationPuzzle {
       return { success: false, message: 'Puzzle already completed.' };
     }
 
+    if (typeof username === 'object' && username !== null) {
+      password = username.password;
+      username = username.username;
+    }
+
     this.attempts++;
 
-    const userMatch = username.toLowerCase().trim() === this.username.toLowerCase().trim();
-    const passMatch = password.trim() === this.password.trim();
+    const userMatch = (username || '').toLowerCase().trim() === (this.username || '').toLowerCase().trim();
+    const passMatch = (password || '').trim() === (this.password || '').trim();
 
     if (userMatch && passMatch) {
       this.solved = true;
@@ -39,6 +46,8 @@ class AuthenticationPuzzle {
       };
     }
 
+    this.mistakes++;
+
     if (this.attempts >= this.maxAttempts) {
       this.failed = true;
       return {
@@ -46,6 +55,7 @@ class AuthenticationPuzzle {
         message: 'ACCESS DENIED — Maximum attempts reached',
         locked: true,
         attempts: this.attempts,
+        mistakes: this.mistakes,
       };
     }
 

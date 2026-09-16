@@ -3,9 +3,9 @@
 // Terminal state, history, command execution pipeline
 // ============================================================
 
-import CommandParser from './CommandParser';
-import CommandRegistry from './CommandRegistry';
-import { GameEvents, eventEngine } from '../engine/EventEngine';
+import CommandParser from './CommandParser.js';
+import CommandRegistry from './CommandRegistry.js';
+import { GameEvents, eventEngine } from '../engine/EventEngine.js';
 
 class TerminalEngine {
   constructor(gameContext) {

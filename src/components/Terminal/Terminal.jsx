@@ -12,7 +12,7 @@ const QUICK_COMMANDS = ['scan', 'help', 'status', 'logs', 'clear'];
 
 export default function Terminal() {
   const [input, setInput] = useState('');
-  const { terminalEngine, sound, engine, puzzleEngine } = useGameEngine();
+  const { terminalEngine, sound, engine } = useGameEngine();
   const [output, setOutput] = useState(terminalEngine.getOutput());
   const outputRef = useRef(null);
   const inputRef = useRef(null);
@@ -103,6 +103,7 @@ export default function Terminal() {
     }
 
     if (event === 'ATTACK_STOPPED' && eventData?.success) {
+      engine.handlePuzzleSolved(eventData);
       mission?.objectives?.forEach(o => {
         if (!o.completed) engine.completeObjective(o.id);
       });

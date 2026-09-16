@@ -3,12 +3,12 @@
 // Puzzle lifecycle manager
 // ============================================================
 
-import AuthenticationPuzzle from '../puzzles/AuthenticationPuzzle';
-import BinaryPuzzle from '../puzzles/BinaryPuzzle';
-import RoutingPuzzle from '../puzzles/RoutingPuzzle';
-import LogAnalysisPuzzle from '../puzzles/LogAnalysisPuzzle';
-import InvestigationPuzzle from '../puzzles/InvestigationPuzzle';
-import { GameEvents, eventEngine } from './EventEngine';
+import AuthenticationPuzzle from '../puzzles/AuthenticationPuzzle.js';
+import BinaryPuzzle from '../puzzles/BinaryPuzzle.js';
+import RoutingPuzzle from '../puzzles/RoutingPuzzle.js';
+import LogAnalysisPuzzle from '../puzzles/LogAnalysisPuzzle.js';
+import InvestigationPuzzle from '../puzzles/InvestigationPuzzle.js';
+import { GameEvents, eventEngine } from './EventEngine.js';
 
 const PUZZLE_TYPES = {
   AUTHENTICATION: AuthenticationPuzzle,

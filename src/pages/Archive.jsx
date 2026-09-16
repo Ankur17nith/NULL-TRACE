@@ -204,8 +204,8 @@ export default function Archive() {
       <header className="archive-header">
         <div className="archive-header__inner">
           <div className="archive-header__left">
-            <HTNButton variant="secondary" size="sm" onClick={() => navigate('/')}>
-              ← SYSTEM HOME
+            <HTNButton variant="secondary" size="sm" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/menu'))}>
+              ← BACK
             </HTNButton>
             <div className="archive-title-group">
               <span className="archive-badge">POLYNET DIGITAL ARCHIVES</span>
