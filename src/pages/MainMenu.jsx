@@ -26,6 +26,12 @@ export default function MainMenu() {
   const [showCallsignInput, setShowCallsignInput] = useState(!callsign);
   const [callsignError, setCallsignError] = useState('');
 
+  useEffect(() => {
+    if (callsign) {
+      setShowCallsignInput(false);
+    }
+  }, [callsign]);
+
   // Intro sequence
   useEffect(() => {
     if (!showIntro) return;

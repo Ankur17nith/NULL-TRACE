@@ -39,19 +39,13 @@ export default function Game() {
 
   const mission = missionEngine.getCurrentMission();
 
-  // Handle mission completion and trigger staged results sequence
+  // Handle mission completion
   useEffect(() => {
     if (status === 'COMPLETED' && !showResults) {
       const result = engine.completeMission();
       if (result) {
         setMissionResult(result);
         setShowResults(true);
-        setResultStep(1);
-
-        // Staged reveal steps for cinematic completion feel
-        const t1 = setTimeout(() => setResultStep(2), 400);
-        const t2 = setTimeout(() => setResultStep(3), 800);
-        const t3 = setTimeout(() => setResultStep(4), 1200);
 
         achievementEngine.checkAll({
           missionId,
@@ -66,15 +60,27 @@ export default function Game() {
           puzzleAttempts: puzzleEngine.getCurrentPuzzle()?.attempts || 0,
           isolated: puzzleEngine.getCurrentPuzzle()?.isolated || false,
         });
-
-        return () => {
-          clearTimeout(t1);
-          clearTimeout(t2);
-          clearTimeout(t3);
-        };
       }
     }
-  }, [status, showResults, engine, missionId, hintsUsed, mistakes, cluesFound, mission?.clues?.length, timeRemaining, totalTime, puzzleEngine, achievementEngine]);
+  }, [status, showResults, engine, missionId, hintsUsed, mistakes, cluesFound, mission?.clues?.length, totalTime, puzzleEngine, achievementEngine]);
+
+  // Staged reveal steps for cinematic completion feel
+  useEffect(() => {
+    if (showResults) {
+      setResultStep(1);
+      const t1 = setTimeout(() => setResultStep(2), 300);
+      const t2 = setTimeout(() => setResultStep(3), 600);
+      const t3 = setTimeout(() => setResultStep(4), 900);
+
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
+    } else {
+      setResultStep(0);
+    }
+  }, [showResults]);
 
   // Redirect if no mission loaded
   useEffect(() => {

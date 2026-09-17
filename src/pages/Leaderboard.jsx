@@ -1,13 +1,46 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGameStore } from '../state/gameStore';
 import { formatScore } from '../utils/formatters';
+import { fetchRemoteLeaderboard } from '../utils/api';
 import HTNButton from '../components/ui/HTNButton';
 import Sparkle from '../components/ui/Sparkle';
 import './PageShared.css';
 
 export default function Leaderboard() {
   const navigate = useNavigate();
-  const leaderboard = useGameStore(s => s.leaderboard);
+  const localLeaderboard = useGameStore(s => s.leaderboard);
+  const [remoteEntries, setRemoteEntries] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchRemoteLeaderboard().then(entries => {
+      if (isMounted && Array.isArray(entries) && entries.length > 0) {
+        setRemoteEntries(entries);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Merge local and remote entries, keeping best score per callsign
+  const combinedMap = new Map();
+  remoteEntries.forEach(entry => {
+    if (entry?.callsign) {
+      combinedMap.set(entry.callsign, { callsign: entry.callsign, score: entry.score });
+    }
+  });
+  localLeaderboard.forEach(entry => {
+    if (entry?.callsign) {
+      const existing = combinedMap.get(entry.callsign);
+      if (!existing || entry.score > existing.score) {
+        combinedMap.set(entry.callsign, { callsign: entry.callsign, score: entry.score });
+      }
+    }
+  });
+
+  const leaderboard = Array.from(combinedMap.values()).sort((a, b) => b.score - a.score);
 
   return (
     <div className="page-container" style={{ position: 'relative' }}>

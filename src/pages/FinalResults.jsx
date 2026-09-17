@@ -9,28 +9,30 @@ import HTNButton from '../components/ui/HTNButton';
 import Sparkle from '../components/ui/Sparkle';
 import './PageShared.css';
 
+import { submitRemoteScore } from '../utils/api';
+
 export default function FinalResults() {
   const navigate = useNavigate();
   const { achievementEngine } = useGameEngine();
-  const callsign = useGameStore(s => s.player.callsign);
-  const bestScores = useGameStore(s => s.progress.bestScores);
   const completedMissions = useGameStore(s => s.progress.completedMissions);
+  const { totalScore, rank, callsign } = useGameStore(s => ({
+    totalScore: s.player.totalScore ?? Object.values(s.progress.bestScores || {}).reduce((sum, v) => sum + v, 0),
+    rank: s.player.rank || ScoreEngine.getRank(Object.values(s.progress.bestScores || {}).reduce((sum, v) => sum + v, 0)),
+    callsign: s.player.callsign,
+  }));
   const addLeaderboardEntry = useGameStore(s => s.addLeaderboardEntry);
 
-  const totalScore = Object.values(bestScores).reduce((sum, v) => sum + v, 0);
-  const rank = ScoreEngine.getRank(totalScore);
-
-  // Animated score count-up
   const [displayScore, setDisplayScore] = useState(0);
 
+  // Animate score counter up
   useEffect(() => {
     soundEngine.playSuccess();
-    let startTime;
     const duration = 1200;
+    const start = performance.now();
     const animateCount = (now) => {
-      if (!startTime) startTime = now;
-      const progress = Math.min(1, (now - startTime) / duration);
-      const ease = progress === 1 ? 1 : 1 - Math.pow(2, -10 * progress);
+      const elapsed = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      const ease = 1 - Math.pow(1 - progress, 3);
       setDisplayScore(Math.round(totalScore * ease));
       if (progress < 1) {
         requestAnimationFrame(animateCount);
@@ -42,12 +44,19 @@ export default function FinalResults() {
 
   const handleSubmitScore = () => {
     soundEngine.playSubmit();
-    addLeaderboardEntry({
+    const entry = {
       callsign: callsign || 'ANON',
       score: totalScore,
-      rank: rank.id,
+      rank: rank.id || rank || 'OPERATOR',
       timestamp: Date.now(),
-    });
+    };
+    addLeaderboardEntry(entry);
+    // Asynchronously synchronize score with backend API
+    submitRemoteScore({
+      callsign: entry.callsign,
+      score: entry.score,
+      rank: typeof entry.rank === 'string' ? entry.rank : 'OPERATOR',
+    }).catch(() => {});
     navigate('/leaderboard');
   };
 

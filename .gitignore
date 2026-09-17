@@ -12,6 +12,17 @@ dist
 dist-ssr
 *.local
 
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Video & Media Exports
+*.mp4
+*.mov
+*.webm
+
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -21,6 +21,7 @@ export function useGameEngine() {
     globalEngine.setTerminalEngine(terminalEngine);
     globalEngine.init();
     globalAchievementEngine = new AchievementEngine(store);
+    if (typeof window !== 'undefined') window.__gameEngine = globalEngine;
   }
 
   return {

@@ -27,7 +27,7 @@ const initialMissionState = {
 
 const initialProgressState = {
   completedMissions: [],
-  unlockedMissions: ['mission-01'],
+  unlockedMissions: ['mission-01', 'mission-02', 'mission-03', 'mission-04', 'mission-05'],
   missionScores: {},
   bestScores: {},
   totalPlayTime: 0,
@@ -292,5 +292,7 @@ export const useGameStore = create(
     }
   )
 );
+
+if (typeof window !== 'undefined') window.useGameStore = useGameStore;
 
 export default useGameStore;
